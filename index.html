@@ -23,25 +23,31 @@
 </head>
 <body>
     <div id="container">
-        <canvas id="world" width="800" height="600"></canvas>
+        <canvas id="world">
+            Your browser does not support canvas. Please try again with a different browser.
+        </canvas>
         <div id="creature-info">
             <h2>Info</h2>
             <strong>Generation:</strong>
-            <div id="generation"></div>
-            <strong>Speed:</strong>
-            <div id="speed"></div>
+            <div id="generation"></div>        
             <strong>Age:</strong>
             <div id="age"></div>
+            <div id="inheritable-info">
+
+            </div>
             <hr>
             <strong>Creature Count</strong>
             <div id="total-creatures"></div>
-            <strong>Average Speed</strong>
-            <div id="average-speed"></div>
+            <div id="inheritable-average">
+
+            </div>
         </div>
     </div>    
 
     <script>  
         var canvas = document.getElementById('world');
+        canvas.width  = 900;
+        canvas.height = 600;
         var ctx = canvas.getContext('2d');  
         var animation;
         var paused = true;
@@ -55,6 +61,7 @@
             breedingEnergy: 1300,
             maturityAge: 500
         };
+        const inheritable = ['speed','breedingEnergy', 'energyBase', 'maturityAge'];
         const energyDrainFactor = 0.15; // Factor by how much energy is drained per draw
         const energyDrainConstant = 1; // Background energy drain (if the creature was sitting still)
         const mutationChance = 0.3; // Chance of a mutation occurring upon breeding
@@ -144,14 +151,15 @@
 
         Creature.prototype.inherit = function(traits) {  
             let mutatedTraits = JSON.parse(JSON.stringify(traits));
-            
-            //Mutate           
-            if(Math.random() < mutationChance){
-                let factor = Math.random() < 0.5 ? -1 * mutationFactor : mutationFactor;
-                console.log('A mutation occurred with a factor of: ', factor);
-                mutatedTraits.speed += factor;
-            }
-            
+
+            for(var i = 0; i < inheritable.length; i++){
+                if(Math.random() < mutationChance){
+                    let factor = Math.random() < 0.5 ? -1 * mutationFactor + 1 : mutationFactor + 1;
+                    console.log(`A ${inheritable[i]} mutation occurred with a factor of: `, factor);
+                    mutatedTraits[inheritable[i]] *= factor;
+                }
+            }    
+
             return mutatedTraits;
         }  
 
@@ -161,6 +169,10 @@
             child.generation = this.generation + 1;
             child.x = this.x;
             child.y = this.y;
+
+            this.energy = this.energy/2;
+
+            child.energy = this.energy;
         }   
 
         Creature.prototype.move = function() {
@@ -278,7 +290,8 @@
             paused = true;
         }        
 
-        // Init        
+        // Init    
+        buildStatsUI();    
         buildWorld(3, 8);
         draw();
 
@@ -286,19 +299,31 @@
 
         // -------------------------------------------
 
-
+        function buildStatsUI(){
+            for(var i = 0; i < inheritable.length; i++){
+                $('#inheritable-info').append(`<strong>${inheritable[i]}: </strong><div id="${inheritable[i]}-info"></div>`);
+                $('#inheritable-average').append(`<strong>Average ${inheritable[i]}: </strong><div id="${inheritable[i]}-average"></div>`);
+            }
+        }
         
         // Show stats
         setInterval(function(){
-            let total = 0;
+            let totals = {};
             let count = 0;
             for(let i in creatures){
-                total += creatures[i].traits.speed;
+                for(var j = 0; j < inheritable.length; j++){
+                    if(!totals[inheritable[j]]) totals[inheritable[j]] = 0;
+                    totals[inheritable[j]] += creatures[i].traits[inheritable[j]];                    
+                }           
                 count++;
             }
-            let average = total/count;
+
             $('#total-creatures').text(count);
-            $('#average-speed').text(average);
+
+            for(var i = 0; i < inheritable.length; i++){
+                $(`#${inheritable[i]}-average`).text(Math.round(totals[inheritable[i]]/count));                  
+            } 
+           
         }, 1000);
 
         function showCreatureInfo(c){
@@ -308,7 +333,10 @@
             c.selected = true;
             $('#generation').text(c.generation);
             $('#age').text(c.age);
-            $('#speed').text(c.traits.speed);
+
+            for(var i = 0; i < inheritable.length; i++){
+                $(`#${inheritable[i]}-info`).text(c.traits[inheritable[i]]);                  
+            } 
         }
 
         canvas.addEventListener('click', (e) => {  
