@@ -1,3 +1,4 @@
+// --- Game constants ---
 var canvas = document.getElementById('world');
 canvas.width  = 900;
 canvas.height = 600;
@@ -6,50 +7,93 @@ var animation;
 var paused = true;
 
 
-var latestCreatureId = 0;
-var creatures = {};
-const baseGenome = {
-    speed: 2,
-    energyBase: 1000,
-    breedingEnergy: 1300,
-    maturityAge: 500
-};
-const inheritable = ['speed','breedingEnergy', 'maturityAge'];
-const energyDrainFactor = 0.15; // Factor by how much energy is drained per draw
-const energyDrainConstant = 1; // Background energy drain (if the creature was sitting still)
-const mutationChance = 0.3; // Chance of a mutation occurring upon breeding
-const mutationFactor = 0.2; // How large a change can occur within the mutation
+const eyeAngle = 0.6; // Angle of eyes from front of body
+const eyeGap = 1;
+const eyeSensitivity= 0.0005; //how sensitive is the eye? decrease for more sensitivity...
+const eyeMult= 0.5; //linear multiplier on strength of eye.
 
-
-var latestFoodId = 0;
-var foods = {};
-const foodSpawnChance = 0.09; // Chance of spawning food every draw
+// ----------------------------------------------------------------------
 
 
 /**
  * @param {Creature} c - Creature being drawn
  */        
-function drawCreature(c){   
-    c.grow(); 
-    c.move();              
-
+function drawCreature(c){ 
     if(c.energy <= 0){
         c.die();
-    }else{    
+    }else{           
         if(c.selected){
             ctx.fillStyle = 'red';
-            ctx.fillRect(c.x-1, c.y-1, c.img.width*c.scaleFactor+2, c.img.height*c.scaleFactor+2);  
+            ctx.beginPath();
+            ctx.arc(c.x, c.y, c.radius+2, 0, 2 * Math.PI);
+            ctx.fill();  
         }
-                
-        ctx.drawImage(c.img, c.x, c.y, c.img.width*c.scaleFactor, c.img.height*c.scaleFactor);  
+
+        // ctx.drawImage(c.img, c.x, c.y, c.img.width*c.scaleFactor, c.img.height*c.scaleFactor); 
+        // Draw body
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, c.radius, 0, 2 * Math.PI);
+        ctx.fillStyle = "skyblue";
+        ctx.fill(); 
+
+        // Draw eyes
+        let eyeDistance = c.radius + eyeGap;  
+        Lx = c.x + eyeDistance*Math.cos(c.direction.a - eyeAngle);
+        Ly = c.y + eyeDistance*Math.sin(c.direction.a - eyeAngle);
+        Rx = c.x + eyeDistance*Math.cos(c.direction.a + eyeAngle);
+        Ry = c.y + eyeDistance*Math.sin(c.direction.a + eyeAngle);
+
+        ctx.beginPath();
+        ctx.arc(Lx, Ly, eyeGap*2+1, 0, 2 * Math.PI);
+        ctx.fillStyle = "skyblue";
+        ctx.fill(); 
+        ctx.beginPath();
+        ctx.arc(Rx, Ry, eyeGap*2+1, 0, 2 * Math.PI);
+        ctx.fillStyle = "skyblue";
+        ctx.fill(); 
+
+        // Draw energy bar
+        ctx.fillStyle = 'lightgreen';
+        let barWidth = (c.energy >= c.traits.breedingEnergy) ? 2*c.radius : c.energy / c.traits.breedingEnergy * 2*c.radius;         
+        ctx.fillRect(c.x-c.radius, c.y + c.radius + 4, barWidth, 4);
+
+        // Reset sensory input
+        c.brain.sL = 0;
+        c.brain.sR = 0;
         
-        ctx.fillStyle = 'green';
-        let barWidth = (c.energy >= c.traits.breedingEnergy) ? c.img.width : c.energy / c.traits.breedingEnergy * c.img.width;         
-        ctx.fillRect(c.x, c.y + c.img.height*c.scaleFactor + 3, barWidth*c.scaleFactor, 5*c.scaleFactor);
-        
-        for(var id in foods){
-            if(withinArea(foods[id].x, foods[id].y, c.x, c.y, c.img.width*c.scaleFactor, c.img.height*c.scaleFactor)) c.eat(foods[id]);
+        //TODO: Move logic like this outside of draw functions but without causing more loops if poss
+        for(let id in foods){
+            let food = foods[id];
+            if(withinRadius(food.x, food.y, c.x, c.y, c.brain.senseRadius)){
+                // pass sum of Sense data to creature's brain: M.e^(-S.d^2)
+                c.brain.sL += eyeMult*Math.exp(-eyeSensitivity*(Math.pow(Lx-food.x,2) + Math.pow(Ly-food.y,2)));
+                c.brain.sR += eyeMult*Math.exp(-eyeSensitivity*(Math.pow(Rx-food.x,2) + Math.pow(Ry-food.y,2)));
+
+                if(withinRadius(food.x, food.y, c.x, c.y, c.radius)) c.eat(food);
+            }            
         }
+
+        let colour = Math.round(c.brain.sL*255.0); 
+        if(colour>255) colour=255;
+        ctx.beginPath();
+        ctx.arc(Lx, Ly, eyeGap*2-1, 0, 2 * Math.PI);
+        ctx.fillStyle = 'rgb('+colour+',0,0)';
+        ctx.fill(); 
+
+        colour = Math.round(c.brain.sR*255.0); 
+        if(colour>255) colour=255;
+        ctx.beginPath();
+        ctx.arc(Rx, Ry, eyeGap*2-1, 0, 2 * Math.PI);
+        ctx.fillStyle = 'rgb('+colour+',0,0)';
+        ctx.fill(); 
+
+        // Yaaargh! Fire the synapses
+        let res = c.brain.fire();
+
+        c.direction = vector(c.direction.a+res,c.direction.m);
+
+        c.grow(); 
+        c.move();  
     }            
 }
 
@@ -106,7 +150,7 @@ function pause(){
 
 
 function init(){ 
-    buildWorld(3, 8);
+    buildWorld(10, 30);
     buildStatsUI();  
     draw();
 }

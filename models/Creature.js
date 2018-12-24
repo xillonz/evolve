@@ -1,15 +1,31 @@
+// --- Creature constants ---
+var latestCreatureId = 0;
+var creatures = {};
+const baseGenome = {
+    speed: 2,
+    energyBase: 1000,
+    breedingEnergy: 1300,
+    maturityAge: 500
+};
+const inheritable = ['speed','breedingEnergy', 'maturityAge'];
+const energyDrainFactor = 0.1; // Factor by how much energy is drained per draw
+const energyDrainConstant = 0.5; // Background energy drain (if the creature was sitting still)
+const mutationChance = 0.3; // Chance of a mutation occurring upon breeding
+const mutationFactor = 0.2; // How large a change can occur within the mutation
+
+const maxCreatures = 30;
+
 // Creature constructor
 var Creature = function(traits){            
     //Base property values for creatures
     this.traits = this.inherit(traits);
+    this.brain = new Brain();
     
     // Starting position
-    this.x = 300;
-    this.y = 150;
+    this.x = randomInt(0, canvas.width);
+    this.y = randomInt(0, canvas.height);;
 
-    let vector = randomVector();
-    this.xDir = vector.x;
-    this.yDir = vector.y;
+    this.direction = randomVector();
     
     this.energy = this.traits.energyBase;
     this.age = 0;
@@ -18,6 +34,9 @@ var Creature = function(traits){
     // Get creature image
     this.img = new Image();
     this.img.src = './assets/images/creature.png';
+
+    this.orginalSize = 17;
+    this.radius = this.orginalSize;
 
     // Family Info
     this.parentId = null;
@@ -31,14 +50,15 @@ var Creature = function(traits){
     creatures[this.id] = this;
 }
 
+// Inherit non intelligent traits
 Creature.prototype.inherit = function(traits) {  
     let mutatedTraits = JSON.parse(JSON.stringify(traits));
 
     for(var i = 0; i < inheritable.length; i++){
         if(Math.random() < mutationChance){
-            let factor = Math.random() < 0.5 ? -1 * mutationFactor + 1 : mutationFactor + 1;
-            console.log(`A ${inheritable[i]} mutation occurred with a factor of: `, factor);
-            mutatedTraits[inheritable[i]] *= factor;
+            let mutation = Math.random() < 0.5 ? -1 * mutationFactor + 1 : mutationFactor + 1;
+            console.log(`A ${inheritable[i]} mutation occurred with a factor of: `, mutation);
+            mutatedTraits[inheritable[i]] *= mutation;
         }
     }    
 
@@ -52,6 +72,9 @@ Creature.prototype.breed = function() {
     child.x = this.x;
     child.y = this.y;
 
+    // Copy brain mapping with chance of mutations
+    child.brain.mutate(this.brain);
+
     this.energy = this.energy/2;
 
     child.energy = this.energy;
@@ -59,18 +82,22 @@ Creature.prototype.breed = function() {
 
 Creature.prototype.move = function() {
         let minAngle = null;
-        if(this.x + this.img.width > canvas.width) minAngle = 90; // hit right side
-        if(this.x < 0) minAngle = 270; // hit left side
-        if(this.y + this.img.height > canvas.height) minAngle = 180; // hit bottom
-        if(this.y < 0) minAngle = 360;  // hit top
+        // if(this.x + this.img.width > canvas.width) minAngle = 90; // hit right side
+        // if(this.x < 0) minAngle = 270; // hit left side
+        // if(this.y + this.img.height > canvas.height) minAngle = 180; // hit bottom
+        // if(this.y < 0) minAngle = 360;  // hit top
+
+        if(this.x + this.radius > canvas.width) minAngle = 90; // hit right side
+        if(this.x - this.radius < 0) minAngle = 270; // hit left side
+        if(this.y + this.radius > canvas.height) minAngle = 180; // hit bottom
+        if(this.y - this.radius < 0) minAngle = 360;  // hit top
+
         if(minAngle !== null){               
-            let vector = randomVector(minAngle, minAngle + 180);
-            this.xDir = vector.x;
-            this.yDir = vector.y;
+            this.direction = randomVector(minAngle, minAngle + 180);
         }
         
-        this.x += this.xDir * this.traits.speed;    
-        this.y += this.yDir * this.traits.speed; 
+        this.x += this.direction.x * this.traits.speed;    
+        this.y += this.direction.y * this.traits.speed; 
 
         this.energy -= energyDrainFactor*this.traits.speed*this.traits.speed + energyDrainConstant; // Reduce creatures energy: D.s²+C
 } 
@@ -83,13 +110,14 @@ Creature.prototype.eat = function(food) {
     this.energy += food.energy;
     delete foods[food.id];
 
-    if(this.energy >= this.traits.breedingEnergy && this.age >= this.traits.maturityAge){
+    if(this.energy >= this.traits.breedingEnergy && this.age >= this.traits.maturityAge && Object.keys(creatures).length < maxCreatures){
         this.breed();
     }
 } 
 
 Creature.prototype.grow = function() {
     this.age += 1
-    this.scaleFactor = (this.age >= this.traits.maturityAge) ? 1 : this.age/this.traits.maturityAge;
-    if(this.scaleFactor < 0.5) this.scaleFactor = 0.5;
+    let scaleFactor = (this.age >= this.traits.maturityAge) ? 1 : this.age/this.traits.maturityAge; 
+    if(scaleFactor < 0.5) scaleFactor = 0.5;
+    this.radius = this.orginalSize*scaleFactor;
 }   
