@@ -31,9 +31,12 @@ function drawCreature(c){
 
         // ctx.drawImage(c.img, c.x, c.y, c.img.width*c.scaleFactor, c.img.height*c.scaleFactor); 
         // Draw body
+        var gradient = ctx.createRadialGradient(c.x, c.y, c.radius*0.1, c.x, c.y, c.radius);
+        gradient.addColorStop(0, 'skyblue');
+        gradient.addColorStop(1, 'dodgerblue');
         ctx.beginPath();
         ctx.arc(c.x, c.y, c.radius, 0, 2 * Math.PI);
-        ctx.fillStyle = "skyblue";
+        ctx.fillStyle = gradient;
         ctx.fill(); 
 
         // Draw eyes
@@ -44,11 +47,11 @@ function drawCreature(c){
         Ry = c.y + eyeDistance*Math.sin(c.direction.a + eyeAngle);
 
         ctx.beginPath();
-        ctx.arc(Lx, Ly, eyeGap*2+1, 0, 2 * Math.PI);
+        ctx.arc(Lx, Ly, eyeGap*2+2, 0, 2 * Math.PI);
         ctx.fillStyle = "skyblue";
         ctx.fill(); 
         ctx.beginPath();
-        ctx.arc(Rx, Ry, eyeGap*2+1, 0, 2 * Math.PI);
+        ctx.arc(Rx, Ry, eyeGap*2+2, 0, 2 * Math.PI);
         ctx.fillStyle = "skyblue";
         ctx.fill(); 
 
@@ -76,15 +79,15 @@ function drawCreature(c){
         let colour = Math.round(c.brain.sL*255.0); 
         if(colour>255) colour=255;
         ctx.beginPath();
-        ctx.arc(Lx, Ly, eyeGap*2-1, 0, 2 * Math.PI);
-        ctx.fillStyle = 'rgb('+colour+',0,0)';
+        ctx.arc(Lx, Ly, eyeGap*2, 0, 2 * Math.PI);
+        ctx.fillStyle = 'rgb('+colour+','+colour+','+colour+')';
         ctx.fill(); 
 
         colour = Math.round(c.brain.sR*255.0); 
         if(colour>255) colour=255;
         ctx.beginPath();
-        ctx.arc(Rx, Ry, eyeGap*2-1, 0, 2 * Math.PI);
-        ctx.fillStyle = 'rgb('+colour+',0,0)';
+        ctx.arc(Rx, Ry, eyeGap*2, 0, 2 * Math.PI);
+        ctx.fillStyle = 'rgb('+colour+','+colour+','+colour+')';
         ctx.fill(); 
 
         // Yaaargh! Fire the synapses
@@ -130,6 +133,8 @@ function draw(){
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
 
     spawnFood();
+
+    if(Object.keys(creatures).length < 1) new Creature(baseGenome);
 
     for(var id in foods){
         drawFood(foods[id]);

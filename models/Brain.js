@@ -1,5 +1,5 @@
 // --- Brain/Neural Network constants ---
-const neuronCount = 30;
+const neuronCount = 20;
 const synapseCount = 3;
 const brainMutationChance = 0.1;
 const brainMutationFactor = 0.3;
@@ -33,21 +33,21 @@ var Brain = function(){
 
 Brain.prototype.fire = function(){
     // Assign input senses to first two nuerons in list (artificially chosen as "input" neurons)
-    this.neurons.activity = this.sL;
-    this.neurons.activity = this.sR;
+    this.neurons[0].activity = this.sL;
+    this.neurons[1].activity = this.sR;
     // Give some extra neurons some bias of 1 or 0 
-    this.neurons.activity = 1;
-    this.neurons.activity = 1;
-    this.neurons.activity = 1;
+    this.neurons[3].activity = 1;
+    this.neurons[4].activity = 1;
+    this.neurons[5].activity = 1;
+    this.neurons[6].activity = 1;
 
-    for(var i=6;i<this.neurons.length;i++){
+    for(var i=7;i<this.neurons.length;i++){
         let neuron = this.neurons[i];        
         let a = 0; //Activation value
         // Check all the synapse links on this neuron
         for(var j=0;j<neuron.synapses.length;j++){
             let synapse = neuron.synapses[j];
             // add up all their weighted values (link weight with target neuron activity)
-            if(this.neurons[synapse.link] === undefined) console.log(this);
             a += synapse.weight*this.neurons[synapse.link].activity;
         }
         // Sigmoid normalise and set as neuron activation value
@@ -69,7 +69,7 @@ Brain.prototype.mutate = function(brain){
             
             //Randomly adjust link weights
             if(Math.random() < brainMutationChance){
-                mutation = randomFloat(0,brainMutationFactor*2) - brainMutationFactor;
+                mutation = randomFloat(0,brainMutationFactor); //randomFloat(0,brainMutationFactor*2) - brainMutationFactor;
                 this.neurons[i].synapses[j].weight += mutation;
             }
             

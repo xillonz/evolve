@@ -19,6 +19,9 @@ function withinRadius(x, y, cx, cy, radius) {
 }
 
 function vector(a, m, x, y){
+    if(a>2*Math.PI) a = a-2*Math.PI;
+    if(a<0) a = 2*Math.PI+a;
+
     if(arguments.length === 2){
         x = Math.cos(a)*m;
         y = Math.sin(a)*m;

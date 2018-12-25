@@ -1,14 +1,14 @@
 // --- Food Constants ---
 var latestFoodId = 0;
 var foods = {};
-const foodSpawnChance = 0.09; // Chance of spawning food every draw
+const foodSpawnChance = 0.08; // Chance of spawning food every draw
 
 // Food constructor
 var Food = function(){
     this.x = randomInt(0, canvas.width);
     this.y = randomInt(0, canvas.height); 
     this.colour = 'tomato';
-    this.energy = randomInt(250, 350);
+    this.energy = randomInt(200, 300);
     this.size = this.energy/70;
 
     // Food ID

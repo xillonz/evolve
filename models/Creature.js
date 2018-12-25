@@ -7,13 +7,13 @@ const baseGenome = {
     breedingEnergy: 1300,
     maturityAge: 500
 };
-const inheritable = ['speed','breedingEnergy', 'maturityAge'];
-const energyDrainFactor = 0.1; // Factor by how much energy is drained per draw
-const energyDrainConstant = 0.5; // Background energy drain (if the creature was sitting still)
+const inheritable = []; // 'speed','breedingEnergy', 'maturityAge'
+const energyDrainFactor = 0.12; // Factor by how much energy is drained per draw
+const energyDrainConstant = 1; // Background energy drain (if the creature was sitting still)
 const mutationChance = 0.3; // Chance of a mutation occurring upon breeding
 const mutationFactor = 0.2; // How large a change can occur within the mutation
 
-const maxCreatures = 30;
+const maxCreatures = 18;
 
 // Creature constructor
 var Creature = function(traits){            
@@ -75,9 +75,9 @@ Creature.prototype.breed = function() {
     // Copy brain mapping with chance of mutations
     child.brain.mutate(this.brain);
 
-    this.energy = this.energy/2;
+    this.energy *= 0.7; // Energy left after breeding
 
-    child.energy = this.energy;
+    // child.energy = this.energy;
 }   
 
 Creature.prototype.move = function() {
