@@ -7,6 +7,7 @@ function showCreatureInfo(c){
     c.selected = true;
     $('#generation').text(c.generation);
     $('#age').text(c.age);
+    $('#current-speed').text(c.direction.m);
 
     for(var i = 0; i < inheritable.length; i++){
         $(`#${inheritable[i]}-info`).text(c.traits[inheritable[i]]);                  
@@ -45,7 +46,7 @@ function buildStatsUI(){
         let y = event.clientY - rect.top;
         for(let i in creatures){
             let c = creatures[i];
-            if(withinArea(x, y, c.x, c.y, c.img.width*c.scaleFactor, c.img.height*c.scaleFactor)){
+            if(withinArea(x, y, c.x, c.y, c.radius, c.radius)){
                 showCreatureInfo(c);
             }
         }          

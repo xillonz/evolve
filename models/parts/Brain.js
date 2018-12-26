@@ -1,0 +1,143 @@
+// --- Brain/Neural Network constants ---
+const hiddenNeuronCount = 30;
+const synapseCount = 12;
+const brainMutationChance = 0.1;
+const brainMutationFactor = 0.3;
+
+var Brain = function(){   
+    this.locateable = false;
+    this.senseRadius = 100;
+    this.inputs = {
+        sL: 0,
+        sR: 0
+    }
+
+    this.outputs = {
+        turn: 0,
+        speed: 0
+    }
+
+    this.hiddenNeuronCount = hiddenNeuronCount;
+    this.synapseCount = synapseCount;
+    this.inputCount = Object.keys(this.inputs).length;
+    this.outputCount = Object.keys(this.outputs).length;
+    this.totalNeurons = this.inputCount + this.hiddenNeuronCount + this.outputCount;
+    this.neurons = [];
+
+    
+    let linkIndex;
+    // Build default neural network
+    for(var i=0; i<this.totalNeurons; i++){
+        let synapses = [];
+        for(var j=0; j<this.synapseCount; j++){
+            //Generate random synapse links with random weights but dont link inputs to each other, or outputs to eachother
+            if(i < this.inputCount){
+                linkIndex = randomInt(this.inputCount - 1, this.totalNeurons - 1)
+            }else if(i > this.totalNeurons - this.outputCount - 1){
+                linkIndex = randomInt(this.inputCount - 1, this.totalNeurons - 1)
+            }else{
+                linkIndex = randomInt(0, this.totalNeurons - 1)
+            }
+            // linkIndex = randomInt(0, this.totalNeurons - 1)
+            synapses.push({
+                weight: randomFloat(-1.5, 1.5),
+                link: linkIndex
+            }); 
+        }
+
+        this.neurons[i] = {
+            activity: 0,
+            synapses: synapses
+        };
+    }  
+}
+
+Brain.prototype.fire = function(){
+    // Assign input senses to first two nuerons in list (artificially chosen as "input" neurons)
+    for(i=this.inputCount+5;i<this.totalNeurons;i++){
+        this.neurons[i].activity = 0;
+    }
+    var i = 0;
+    for(var action in this.inputs){
+        this.neurons[i].activity = this.inputs[action];
+        i++;
+    }
+    // Give some extra neurons some bias of 1 or 0 
+    this.neurons[this.inputCount+1].activity = 1;
+    this.neurons[this.inputCount+2].activity = 1;
+    this.neurons[this.inputCount+3].activity = 1;
+    this.neurons[this.inputCount+4].activity = 1;
+
+    for(i=this.inputCount+5;i<this.totalNeurons;i++){
+        let neuron = this.neurons[i];           
+        let a = 0; //Activation value
+        // Check all the synapse links on this neuron
+        for(var j=0;j<neuron.synapses.length;j++){
+            let synapse = neuron.synapses[j];
+            // add up all their weighted values (link weight with target neuron activity)
+            a += synapse.weight*this.neurons[synapse.link].activity;
+        }        
+
+        // if(a > 2000 || a < -2000){
+        //     console.log(this);
+        //     let test = 0;
+        //     for(j=0;j<neuron.synapses.length;j++){
+        //         let synapse = neuron.synapses[j];
+        //         // add up all their weighted values (link weight with target neuron activity)
+        //         test += synapse.weight*this.neurons[synapse.link].activity;
+        //         console.log('link: ', synapse.link);
+        //         console.log(synapse.weight, this.neurons[synapse.link].activity);
+        //         console.log('current: ', test)
+        //     } 
+        //     console.log('final: ', test);
+        //     pause();
+        //     return;
+        // }
+        // Sigmoid normalise and set as neuron activation value
+        neuron.activity = (i < this.totalNeurons - this.outputCount - 1) ? 1.0/(1.0 + Math.exp(-a)) : a;   
+    }
+
+    // Artificially treat the final neurons as the output
+    let outputs = this.neurons.slice(Math.max(this.totalNeurons - this.outputCount, 1));
+    i = 0;
+    for(var action in this.outputs){        
+        this.outputs[action] = outputs[i].activity - outputs[i].activity/2;
+        i++;
+    }
+    return this.outputs;
+}
+
+Brain.prototype.inherit = function(brain){   
+    for (var i=0;i<this.totalNeurons;i++) {
+        this.neurons[i] = {
+            activity: 0,
+            synapses: JSON.parse(JSON.stringify(brain.neurons[i].synapses))
+        }
+        for (var j=0;j<this.synapseCount;j++) {
+            
+            //Randomly adjust link weights
+            if(Math.random() < brainMutationChance){
+                let weightChange = randomFloat(0,brainMutationFactor*2) - brainMutationFactor;
+                this.neurons[i].synapses[j].weight += weightChange;
+            }
+            
+            //Randomly adjust synapse links
+            if(Math.random() < brainMutationChance){
+                let linkIndex;
+
+                if(i < this.inputCount){
+                    linkIndex = randomInt(this.inputCount - 1, this.totalNeurons - 1)
+                }else if(i > this.totalNeurons - this.outputCount - 1){
+                    linkIndex = randomInt(this.inputCount - 1, this.totalNeurons - 1)
+                }else{
+                    linkIndex = randomInt(0, this.totalNeurons - 1)
+                }
+
+                // linkIndex = randomInt(0, this.totalNeurons - 1)
+   
+                this.neurons[i].synapses[j].link = linkIndex;
+            }
+            
+        }
+    }
+}

@@ -28,10 +28,10 @@ function vector(a, m, x, y){
     }
 
     return {
-        x: x,
-        y: y,
-        a: a,
-        m: m
+        x: x, //x length
+        y: y, //y length
+        a: a, //angle
+        m: m  //hypotenuse
     }
 }
 
@@ -41,9 +41,7 @@ function randomVector(minA, maxA, magnitude){
     if(typeof maxA === 'undefined') maxA = 360;
     if(typeof magnitude === 'undefined') magnitude = 1;
     let angle = randomInt(minA, maxA) * (Math.PI / 180);
-    let xDir = Math.cos(angle);
-    let yDir = Math.sin(angle);
 
-    return vector(angle, magnitude, xDir*magnitude, yDir*magnitude);  
+    return vector(angle, magnitude);  
 }
 // --------------------------
