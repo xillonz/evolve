@@ -67,7 +67,7 @@ class Creature{
         // Update the stats to that of the parent with mutations
         if(parent != 'undefined' && parent instanceof Creature) this.genesis(parent);
 
-        this.checkAbnormalities();
+        this.checkAbnormalities(0);
     }   
     
     genesis(parent){
@@ -104,10 +104,10 @@ class Creature{
         this.y = parent.y+parent.radius*2;
     }
 
-    checkAbnormalities(){        
+    checkAbnormalities(abnormalityBonus){        
         // Randomly aquire new parts
         for(var i in partClasses){
-            if(Math.random() < partMutationChance){
+            if(Math.random() < partMutationChance + abnormalityBonus){
                 var newPart = new partClasses[i]();
                 console.log('A new part has appeared: ', newPart);
                 this.parts.push(newPart);

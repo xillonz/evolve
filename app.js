@@ -7,6 +7,8 @@ var animation, processing;
 var processFPS = 60;
 var paused = true;
 
+const maxFood = 500;
+
 
 // ----------------------------------------------------------------------
 
@@ -144,11 +146,7 @@ function drawCreature(c){
 }
 
 function spawnFood(){            
-    if(Math.random() <= foodSpawnChance) new Food();            
-}
-
-function spawnCreature(){            
-              
+    if(Object.keys(foods).length < maxFood && Math.random() <= foodSpawnChance) new Food();            
 }
 
 // Set initial conditions
@@ -206,6 +204,7 @@ function pause(){
 } 
 
 function startProcess(){
+    $('#fps').text(processFPS);
     processing = setInterval(process, 1000/processFPS);
 }
 
@@ -216,15 +215,30 @@ function init(){
     draw();
 }
 
+function changeSpeed(change){
+    clearInterval(processing);
+    processFPS += change;
+    if(processFPS < 10) processFPS = 10;
+    startProcess();
+}
+
 
 document.addEventListener('keydown', function(event) {
-    if (event.code == 'Pause'){
-        if(paused){
-            startProcess();
-            draw();
-        }else{
-            pause();
-        }
+    switch(event.code){
+        case 'Pause':
+            if(paused){
+                startProcess();
+                draw();
+            }else{
+                pause();
+            }
+            break;
+        case 'ArrowRight':
+            changeSpeed(10);
+            break;
+        case 'ArrowLeft':
+            changeSpeed(-10);
+            break;
     }
-});
-        
+ 
+}); 

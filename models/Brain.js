@@ -106,10 +106,10 @@ class Brain{
                 if(Math.random() < brainMutationChance){
                     let linkIndex;
     
-                    if(i < this.inputCount){
-                        linkIndex = randomInt(this.inputCount - 1, this.totalNeurons - 1)
-                    }else if(i > this.totalNeurons - this.outputCount - 1){
-                        linkIndex = randomInt(this.inputCount - 1, this.totalNeurons - 1)
+                    if(i < this.inputCount){ // Input neuron
+                        linkIndex = randomInt(this.inputCount, this.totalNeurons - 1)
+                    }else if(i > this.totalNeurons - this.outputCount - 1){ //Output neuron
+                        linkIndex = randomInt(0, this.totalNeurons - this.outputCount - 1)
                     }else{
                         linkIndex = randomInt(0, this.totalNeurons - 1)
                     }
