@@ -51,10 +51,4 @@ function buildStatsUI(){
             }
         }          
     });
-    
-    document.addEventListener('keydown', function(event) {
-        if (event.code == 'Pause'){
-            (paused) ? draw() : pause();
-        }
-    });
 }

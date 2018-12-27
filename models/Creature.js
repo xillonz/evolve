@@ -14,86 +14,113 @@ const energyDrainConstant = 1; // Background energy drain (if the creature was s
 const mutationChance = 0.3; // Chance of a mutation occurring upon breeding
 const mutationFactor = 0.2; // How large a change can occur within the mutation
 
+var partClasses = { Mouth, Ear } // Parts the creature has access to
+const partMutationChance = 0.2;
+
 const maxCreatures = 18;
 
-// Creature constructor
-var Creature = function(parent){            
-    //Base property values for creatures
-    this.traits = baseGenome; 
-    this.parts = {
-        brain: new Brain(),
-        mouth: new Mouth()
-    };
-    
-    // Starting position
-    this.x = randomInt(0, canvas.width);
-    this.y = randomInt(0, canvas.height);
-
-    this.direction = randomVector(0, 2*Math.PI, this.traits.speed);
-    
-    this.energy = this.traits.energyBase;
-    this.age = 0;
-    this.scaleFactor = 0.5;
-    
-    // Get creature image
-    // this.img = new Image();
-    // this.img.src = './assets/images/creature.png';
-
-    this.baseSize = 17;
-    this.radius = this.baseSize;
-
-    // Family Info
-    this.parentId = null;
-    this.generation = 1;
-    this.selected = false;
-
-    // Creature ID
-    latestCreatureId += 1;
-    this.id = latestCreatureId;
-    
-    creatures[this.id] = this;
-    // Update the stats to that of the parent with mutations
-    if(parent != 'undefined' && parent instanceof Creature) this.inherit(parent);
+// Mutation Helper
+function mutate(val){
+    let mutation = 1;
+    if(Math.random() < mutationChance){
+        mutation = Math.random() < 0.5 ? -1 * mutationFactor + 1 : mutationFactor + 1; 
+    }
+    return val*mutation; 
 }
 
-// Inherit parents traits and parts
-Creature.prototype.inherit = function(parent) {  
-    // Inherit traits
-    let traits = parent.traits;
-    let mutatedTraits = JSON.parse(JSON.stringify(traits));
+// Creature constructor
+class Creature{
+    constructor(parent){
+        //Base property values for creatures
+        this.traits = baseGenome; 
+        this.brain = new Brain();        
+        this.parts = [];
 
-    for(var i = 0; i < inheritable.length; i++){
-        if(Math.random() < mutationChance){
-            let mutation = Math.random() < 0.5 ? -1 * mutationFactor + 1 : mutationFactor + 1;
-            mutatedTraits[inheritable[i]] *= mutation;
+        // Starting position
+        this.x = randomInt(0, canvas.width);
+        this.y = randomInt(0, canvas.height);
+
+        this.direction = randomVector(0, 360, this.traits.speed);
+
+        this.energy = this.traits.energyBase;
+        this.age = 0;
+        this.scaleFactor = 0.5;
+
+        // Get creature image
+        // this.img = new Image();
+        // this.img.src = './assets/images/creature.png';
+
+        this.baseSize = 17;
+        this.radius = this.baseSize;
+
+        // Family Info
+        this.parentId = null;
+        this.generation = 1;
+        this.selected = false;
+
+        // Creature ID
+        latestCreatureId += 1;
+        this.id = latestCreatureId;
+
+        creatures[this.id] = this;
+
+        // Update the stats to that of the parent with mutations
+        if(parent != 'undefined' && parent instanceof Creature) this.genesis(parent);
+
+        this.checkAbnormalities();
+    }   
+    
+    genesis(parent){
+        // Inherit traits
+        let traits = parent.traits;
+        let mutatedTraits = JSON.parse(JSON.stringify(traits));
+
+        for(var i = 0; i < inheritable.length; i++){
+            if(Math.random() < mutationChance){
+                let mutation = Math.random() < 0.5 ? -1 * mutationFactor + 1 : mutationFactor + 1;
+                mutatedTraits[inheritable[i]] *= mutation;
+            }
+
+            mutatedTraits[inheritable[i]] = mutate(mutatedTraits[inheritable[i]]);
+        }    
+
+        this.traits = mutatedTraits;
+
+        // Inherit the parents brain
+        this.brain.inherit(parent.brain);
+
+        // Inherit parts
+        for(var i=0; i<parent.parts.length;i++){
+            let newPart = new parent.parts[i].constructor(parent);
+            this.parts.push(newPart);
+            newPart.inherit(parent.parts[i])
         }
-    }    
+    
 
-    this.traits = mutatedTraits;
-
-
-    // Inherit parts
-    for(var i in parent.parts){
-        let className = parent.parts[i].constructor.name;
-        let newPart = new window[className];
-        this.parts[className.toLowerCase()] = newPart;
-        newPart.inherit(parent.parts[i])
+        // Update child stats
+        this.parentId = parent.id; 
+        this.generation = parent.generation + 1;
+        this.x = parent.x+parent.radius*2;
+        this.y = parent.y+parent.radius*2;
     }
 
+    checkAbnormalities(){        
+        // Randomly aquire new parts
+        for(var i in partClasses){
+            if(Math.random() < partMutationChance){
+                var newPart = new partClasses[i]();
+                console.log('A new part has appeared: ', newPart);
+                this.parts.push(newPart);
+            }
+        }    
+    }
 
-    // Update child stats
-    this.parentId = parent.id; 
-    this.generation = parent.generation + 1;
-    this.x = parent.x+parent.radius*2;
-    this.y = parent.y+parent.radius*2;
-}  
+    breed(){
+        new Creature(this);
+        this.energy *= 0.7; // Energy left after breeding
+    }
 
-Creature.prototype.breed = function() {  
-    new Creature(this);
-    this.energy *= 0.7; // Energy left after breeding
-}   
-
-Creature.prototype.move = function(turn, speed) {
+    move(turn, speed){
         // BOUNCE OFF WALL
         // let minAngle = null;
         // if(this.x + this.img.width > canvas.width) minAngle = 90; // hit right side
@@ -117,39 +144,23 @@ Creature.prototype.move = function(turn, speed) {
         this.x += this.direction.x;    
         this.y += this.direction.y; 
 
+        // Teleport to otherside of map
         if(this.x<0) this.x = canvas.width;
         if(this.x>canvas.width) this.x= 0;
         if(this.y<0) this.y= canvas.height;
         if(this.y>canvas.height) this.y= 0;
 
         this.energy -= energyDrainFactor*this.radius*this.direction.m*this.direction.m + energyDrainConstant; // Reduce creatures energy: D.m.v²+C
-} 
+    }
 
-Creature.prototype.die = function() {
-    delete creatures[this.id];
-} 
+    die(){
+        delete creatures[this.id];
+    }
 
-Creature.prototype.eat = function(food) {
-    this.energy += food.energy;
-    delete foods[food.id];
-
-    if(this.energy >= this.traits.breedingEnergy && this.age >= this.traits.maturityAge && Object.keys(creatures).length < maxCreatures){
-        this.breed();
+    grow(){
+        this.age += 1
+        let scaleFactor = (this.age >= this.traits.maturityAge) ? 1 : this.age/this.traits.maturityAge; 
+        if(scaleFactor < 0.5) scaleFactor = 0.5;
+        this.radius = this.baseSize*scaleFactor;
     }
 } 
-
-Creature.prototype.grow = function() {
-    this.age += 1
-    let scaleFactor = (this.age >= this.traits.maturityAge) ? 1 : this.age/this.traits.maturityAge; 
-    if(scaleFactor < 0.5) scaleFactor = 0.5;
-    this.radius = this.baseSize*scaleFactor;
-}   
-
-//Update the part locations relative to the creature
-Creature.prototype.locateParts = function(){
-    for(var i in this.parts){
-        let part = this.parts[i];
-        part.x = this.x + this.radius*part.distance*Math.cos(this.direction.a - part.angle);
-        part.y = this.y + this.radius*part.distance*Math.sin(this.direction.a - part.angle);
-    }
-}
