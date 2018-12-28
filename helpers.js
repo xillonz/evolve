@@ -6,16 +6,23 @@ function randomInt(min, max){ // min and max included
 
 function randomFloat(min, max) {
     return Math.random() * (max - min) + min;
-  }
+}
+
+// Gets the distance squared between two points, can be passed root=true to get the actual distance
+function distance(x1, y1, x2, y2, root){
+    if(typeof root === 'undefined') root = false;
+    var distancesquared = (x1 - x2)**2 + (y1 - y2)**2;
+    return (root) ? Math.sqrt(distancesquared) : distancesquared;
+}
 
 // Check if a location is within a rectangular area given top left corner pos and dimensions of rectangle
 function withinArea(x, y, xMin, yMin, width, height){
     return x > xMin && x < xMin + width && y > yMin && y < yMin + height;
 }
 
-function withinRadius(x, y, cx, cy, radius) {
-    var distancesquared = (x - cx) * (x - cx) + (y - cy) * (y - cy);
-    return distancesquared <= radius * radius;
+function withinRadius(x1, y1, x2, y2, radius) {
+    var distancesquared = (x1 - x2)**2 + (y1 - y2)**2;
+    return distancesquared <= radius**2;
 }
 
 function vector(a, m, x, y){
@@ -43,5 +50,14 @@ function randomVector(minA, maxA, magnitude){
     let angle = randomInt(minA, maxA) * (Math.PI / 180);
 
     return vector(angle, magnitude);  
+}
+
+// Count number of instances of class in an array
+function countClass(a, c){
+    let count = 0;  
+    for(var i = 0; i < a.length; i++){
+        if(a[i] instanceof c) count++;
+    }
+    return count;
 }
 // --------------------------

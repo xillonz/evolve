@@ -2,30 +2,55 @@
 var latestCreatureId = 0;
 var creatures = {};
 const baseGenome = {
-    speed: 2,
-    turn: 0.06,
-    energyBase: 1000,
-    breedingEnergy: 1300,
-    maturityAge: 500
+    speed: 1,
+    turn: 0.02,
+    energyBase: 1000    
 };
-const inheritable = ['speed', 'turn']; // 'speed','breedingEnergy', 'maturityAge'
+const inheritable = ['speed', 'turn']; // inheritable traits that dont belong to a part
 const energyDrainFactor = 0.001; // Factor by how much energy is drained per draw
 const energyDrainConstant = 1; // Background energy drain (if the creature was sitting still)
-const mutationChance = 0.3; // Chance of a mutation occurring upon breeding
-const mutationFactor = 0.2; // How large a change can occur within the mutation
 
-var partClasses = { Mouth, Ear } // Parts the creature has access to
-const partMutationChance = 0.2;
+const mutationChance = 0.2; // Chance of a mutation occurring upon breeding
+const mutationFactor = 0.1; // How large a change can occur within the mutation
 
-const maxCreatures = 18;
+var mouthMutation = false;
 
 // Mutation Helper
-function mutate(val){
+function mutate(val, min, max){
+
     let mutation = 1;
     if(Math.random() < mutationChance){
-        mutation = Math.random() < 0.5 ? -1 * mutationFactor + 1 : mutationFactor + 1; 
+        let factor = randomFloat(0, mutationFactor);
+        mutation = Math.random() < 0.5 ? 1 - factor : factor + 1; // 50/50 chance of reducing or increasing stats
     }
-    return val*mutation; 
+
+    val *= mutation;
+
+    if(typeof min !== 'undefined' && val < min) val = min;
+    if(typeof max !== 'undefined' && val > max) val = max;
+   
+    return val; 
+}
+
+function mutateAngle(val, min, max){
+    if(typeof min === 'undefined') min = 0;
+    if(typeof max === 'undefined') max = 360;
+
+    let mutation = 1;
+    if(Math.random() < mutationChance){
+        let factor = randomFloat(0, mutationFactor);
+        mutation = Math.random() < 0.5 ? 1 - factor : factor + 1; 
+    }
+
+    val *= mutation * (Math.PI / 180);
+
+    if(val>2*Math.PI) val = val-2*Math.PI;
+    if(val<0) val = 2*Math.PI+val;
+
+    if(val < min) val = min;
+    if(val > max) val = max;
+   
+    return val; 
 }
 
 // Creature constructor
@@ -33,8 +58,10 @@ class Creature{
     constructor(parent){
         //Base property values for creatures
         this.traits = baseGenome; 
-        this.brain = new Brain();        
+        this.brain = new Brain(this);    
+        this.reproducer = new Reproducer(this);    
         this.parts = [];
+        
 
         // Starting position
         this.x = randomInt(0, canvas.width);
@@ -91,11 +118,10 @@ class Creature{
 
         // Inherit parts
         for(var i=0; i<parent.parts.length;i++){
-            let newPart = new parent.parts[i].constructor(parent);
+            let newPart = new parent.parts[i].constructor(this);
             this.parts.push(newPart);
             newPart.inherit(parent.parts[i])
-        }
-    
+        }    
 
         // Update child stats
         this.parentId = parent.id; 
@@ -107,17 +133,12 @@ class Creature{
     checkAbnormalities(abnormalityBonus){        
         // Randomly aquire new parts
         for(var i in partClasses){
-            if(Math.random() < partMutationChance + abnormalityBonus){
-                var newPart = new partClasses[i]();
-                console.log('A new part has appeared: ', newPart);
+            if(countClass(this.parts, partClasses[i]) >= partClasses[i].limit()) continue;
+            if(Math.random() < partClasses[i].mutationChance() + abnormalityBonus){
+                var newPart = new partClasses[i](this);
                 this.parts.push(newPart);
             }
         }    
-    }
-
-    breed(){
-        new Creature(this);
-        this.energy *= 0.7; // Energy left after breeding
     }
 
     move(turn, speed){
@@ -153,14 +174,14 @@ class Creature{
         this.energy -= energyDrainFactor*this.radius*this.direction.m*this.direction.m + energyDrainConstant; // Reduce creatures energy: D.m.v²+C
     }
 
-    die(){
-        delete creatures[this.id];
-    }
-
     grow(){
         this.age += 1
-        let scaleFactor = (this.age >= this.traits.maturityAge) ? 1 : this.age/this.traits.maturityAge; 
+        let scaleFactor = (this.age >= this.reproducer.maturityAge) ? 1 : this.age/this.reproducer.maturityAge; 
         if(scaleFactor < 0.5) scaleFactor = 0.5;
         this.radius = this.baseSize*scaleFactor;
+    }
+
+    die(){
+        delete creatures[this.id];
     }
 } 

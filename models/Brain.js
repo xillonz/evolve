@@ -5,7 +5,9 @@ const brainMutationChance = 0.1;
 const brainMutationFactor = 0.3;
 
 class Brain{   
-    constructor(){
+    constructor(creature){
+        this.creature = creature;
+
         this.inputs = []
     
         this.outputs = {

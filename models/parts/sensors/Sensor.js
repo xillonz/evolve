@@ -1,6 +1,6 @@
 class Sensor extends Part{
-    constructor(){
-        super();
+    constructor(creature){
+        super(creature);
         this.isSensor = true;
         this.inputs = [];
     }

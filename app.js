@@ -8,6 +8,10 @@ var processFPS = 60;
 var paused = true;
 
 const maxFood = 500;
+const maxCreatures = 18;
+const minCreatures = 5;
+
+var partClasses = { Mouth, Ear, Absorber } // Parts creatures have access to
 
 
 // ----------------------------------------------------------------------
@@ -31,24 +35,6 @@ function updateCreature(c){
             c.brain.inputs.push(sensor.inputs[j]); // Send data to brain
         }        
     }
-
-    // // Colour eyes
-    // let colour = Math.round(c.brain.inputs.sL*255.0); 
-    // if(colour>255) colour=255;
-    // ctx.beginPath();
-    // ctx.arc(Lx, Ly, eyeGap*2, 0, 2 * Math.PI);
-    // ctx.fillStyle = 'rgb('+colour+','+colour+','+colour+')';
-    // ctx.fill(); 
-
-    // colour = Math.round(c.brain.inputs.sR*255.0); 
-    // if(colour>255) colour=255;
-    // ctx.beginPath();
-    // ctx.arc(Rx, Ry, eyeGap*2, 0, 2 * Math.PI);
-    // ctx.fillStyle = 'rgb('+colour+','+colour+','+colour+')';
-    // ctx.fill(); 
-
-
-    
 
     // Yaaargh! Fire the synapses
     let res = c.brain.fire();
@@ -75,6 +61,11 @@ function updateCreature(c){
         
         // Act upon the world if capable
         if(!part.isSensor) part.act(c);             
+    }
+
+    // Attempt to reproduce if creature limit is not hit
+    if(Object.keys(creatures).length < maxCreatures){
+        c.reproducer.reproduce(c); 
     }
 
     // TODO: After actions have been taken, update creature state
@@ -125,13 +116,29 @@ function drawCreature(c){
         if(!part.locatable) continue;
         ctx.beginPath();
         ctx.arc(part.x, part.y, part.radius, 0, 2 * Math.PI);
-        ctx.fillStyle = part.colour;
+        ctx.fillStyle = `rgb(${part.colour.r}, ${part.colour.g}, ${part.colour.b})`;
         ctx.fill(); 
     }
 
+    // TODO: add animation to sensory input
+    // // Colour eyes 
+    // let colour = Math.round(c.brain.inputs.sL*255.0); 
+    // if(colour>255) colour=255;
+    // ctx.beginPath();
+    // ctx.arc(Lx, Ly, eyeGap*2, 0, 2 * Math.PI);
+    // ctx.fillStyle = 'rgb('+colour+','+colour+','+colour+')';
+    // ctx.fill(); 
+
+    // colour = Math.round(c.brain.inputs.sR*255.0); 
+    // if(colour>255) colour=255;
+    // ctx.beginPath();
+    // ctx.arc(Rx, Ry, eyeGap*2, 0, 2 * Math.PI);
+    // ctx.fillStyle = 'rgb('+colour+','+colour+','+colour+')';
+    // ctx.fill(); 
+
     // Draw energy bar
-    ctx.fillStyle = 'lightgreen';
-    let barWidth = (c.energy >= c.traits.breedingEnergy) ? 2*c.radius : c.energy / c.traits.breedingEnergy * 2*c.radius;         
+    ctx.fillStyle = 'khaki';
+    let barWidth = (c.energy >= c.reproducer.breedingEnergy) ? 2*c.radius : c.energy / c.reproducer.breedingEnergy * 2*c.radius;         
     ctx.fillRect(c.x-c.radius, c.y + c.radius + 4, barWidth, 4);            
 }
 
@@ -139,11 +146,16 @@ function drawCreature(c){
  * @param {Food} f - Food being drawn
  */        
     function drawFood(f){ 
-    ctx.beginPath();    
-    ctx.arc(f.x, f.y, f.size, 0, 2*Math.PI);
-    ctx.fillStyle = f.colour;
-    ctx.fill();                  
-}
+        if(f.energy <= 0){
+            delete foods[f.id];
+            return;
+        }
+
+        ctx.beginPath();    
+        ctx.arc(f.x, f.y, f.size(), 0, 2*Math.PI);
+        ctx.fillStyle = f.colour;
+        ctx.fill();                  
+    }
 
 function spawnFood(){            
     if(Object.keys(foods).length < maxFood && Math.random() <= foodSpawnChance) new Food();            
@@ -166,7 +178,7 @@ function buildWorld(creatureCount, foodCount){
 // Process game logic
 function process(){
 
-    if(Object.keys(creatures).length < 2){
+    if(Object.keys(creatures).length < minCreatures){
         // for(var i in creatures){ // inherit from last creatures
             new Creature() // new Creature(creatures[i])
         // }        
