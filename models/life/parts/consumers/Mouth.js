@@ -28,11 +28,19 @@ class Mouth extends Part{
 
     // Bite
     act(){
-        for(let id in foods){
-            let food = foods[id];   
-            if(food.size() <= this.radius && withinRadius(food.x, food.y, this.x, this.y, this.radius)){
-                this.creature.energy += food.energy;
-                delete foods[food.id];
+        for(let id in nutrients){
+            let nutrient = nutrients[id];   
+            if(nutrient.size() <= this.radius && withinRadius(nutrient.x, nutrient.y, this.x, this.y, this.radius)){
+                this.creature.energy += nutrient.energy;
+                delete nutrients[nutrient.id];
+            }
+        }
+
+        for(let id in toxins){
+            let toxin = toxins[id];   
+            if(toxin.toxicity <= this.radius && withinRadius(toxin.x, toxin.y, this.x, this.y, this.radius)){
+                this.creature.energy -= toxin.toxicity/0.3; // Reduce energy by toxicity reduces by some creature resistance factor (to be updated)
+                delete toxins[toxin.id];
             }
         }
     }

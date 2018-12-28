@@ -72,7 +72,6 @@ class Brain{
             for(let j=0;j<neuron.synapses.length;j++){
                 let synapse = neuron.synapses[j];
                 // add up all their weighted values (link weight with target neuron activity)
-                if(this.neurons[synapse.link] === undefined) console.log(this, synapse)
                 a += synapse.weight*this.neurons[synapse.link].activity;
             }       
 
@@ -115,8 +114,6 @@ class Brain{
                     }else{
                         linkIndex = randomInt(0, this.totalNeurons - 1)
                     }
-    
-                    // linkIndex = randomInt(0, this.totalNeurons - 1)
        
                     this.neurons[i].synapses[j].link = linkIndex;
                 }

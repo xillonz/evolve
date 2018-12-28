@@ -7,7 +7,6 @@ var animation, processing;
 var processFPS = 60;
 var paused = true;
 
-const maxFood = 500;
 const maxCreatures = 18;
 const minCreatures = 5;
 
@@ -142,36 +141,18 @@ function drawCreature(c){
     ctx.fillRect(c.x-c.radius, c.y + c.radius + 4, barWidth, 4);            
 }
 
-/**
- * @param {Food} f - Food being drawn
- */        
-    function drawFood(f){ 
-        if(f.energy <= 0){
-            delete foods[f.id];
-            return;
-        }
-
-        ctx.beginPath();    
-        ctx.arc(f.x, f.y, f.size(), 0, 2*Math.PI);
-        ctx.fillStyle = f.colour;
-        ctx.fill();                  
-    }
-
-function spawnFood(){            
-    if(Object.keys(foods).length < maxFood && Math.random() <= foodSpawnChance) new Food();            
-}
 
 // Set initial conditions
-function buildWorld(creatureCount, foodCount){
+function buildWorld(creatureCount, nutrientCount){
     while(creatureCount){
         new Creature()
         creatureCount--;
         
     }
 
-    while(foodCount){
-        new Food()
-        foodCount--;
+    while(nutrientCount){
+        new Nutrient()
+        nutrientCount--;
     }
 }
 
@@ -184,8 +165,7 @@ function process(){
         // }        
     }
 
-    // Update foods
-    spawnFood();
+    environment.update();
 
     for(var id in creatures){
         updateCreature(creatures[id]);
@@ -197,9 +177,7 @@ function draw(){
     paused = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas       
 
-    for(var id in foods){
-        drawFood(foods[id]);
-    }
+    environment.draw();
 
     for(var id in creatures){
         drawCreature(creatures[id]);
@@ -251,11 +229,5 @@ document.addEventListener('keydown', function(event) {
         case 'ArrowLeft':
             changeSpeed(-10);
             break;
-    }
- 
+    } 
 }); 
-
-
-// TODO:
-//  - Add energy use to brain and parts
-//  - Balance food

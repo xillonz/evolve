@@ -21,25 +21,36 @@ class Ear extends Sensor{
 
     sense(){
         this.inputs = [];
-        let input = 0;
-        for(let id in foods){
-            let food = foods[id];
-            if(withinRadius(food.x, food.y, this.x, this.y, this.hearingRadius)){
+        let nutrientInput = 0;
+        for(let id in nutrients){
+            let nutrient = nutrients[id];
+            if(withinRadius(nutrient.x, nutrient.y, this.x, this.y, this.hearingRadius)){
                 // pass sum of Sense data to creature's brain: M.e^(-S.d^2)
-                input += earMult*Math.exp(-earSensitivity*(distance(this.x, this.y, food.x, food.y)));                
+                nutrientInput += earMult*Math.exp(-earSensitivity*(distance(this.x, this.y, nutrient.x, nutrient.y)));                
             }            
         }
-         
+
+        this.inputs.push(nutrientInput);
+        
+        let toxinInput = 0;
+        for(let id in toxins){
+            let toxin = toxins[id];
+            if(withinRadius(toxin.x, toxin.y, this.x, this.y, this.hearingRadius)){
+                // pass sum of Sense data to creature's brain: M.e^(-S.d^2)
+                toxinInput += earMult*Math.exp(-earSensitivity*(distance(this.x, this.y, toxin.x, toxin.y)));                
+            }            
+        }
+
+        this.inputs.push(toxinInput);
+
         // Colour ears based on how much they sense
-        let colour = Math.round(input*255.0); 
+        let colour = Math.round((toxinInput+nutrientInput)*255.0); 
         if(colour>255) colour=255;
         this.colour = {
             r: colour,
             g: colour,
             b: colour
-        };
-
-        this.inputs.push(input);
+        };                 
     }
 
     inherit(ear){
