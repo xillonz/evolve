@@ -254,3 +254,8 @@ document.addEventListener('keydown', function(event) {
     }
  
 }); 
+
+
+// TODO:
+//  - Add energy use to brain and parts
+//  - Balance food
