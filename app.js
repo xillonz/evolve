@@ -3,231 +3,160 @@ var canvas = document.getElementById('world');
 canvas.width  = 900;
 canvas.height = 600;
 var ctx = canvas.getContext('2d');  
-var animation, processing;
-var processFPS = 60;
-var paused = true;
+var drawing, updating;
 
-const maxCreatures = 18;
+const maxCreatures = 30;
 const minCreatures = 5;
-
-var partClasses = { Mouth, Ear, Absorber } // Parts creatures have access to
 
 
 // ----------------------------------------------------------------------
 
+var App = {
+    paused: true,
+    updateFPS: 60,
+    init: function(){ 
+        this.buildWorld(12, 30);
+        buildStatsUI(); // TODO: change after stats organised 
+        this.bind();
+        this.startUpdate();
+        this.draw();
+    },
 
-function updateCreature(c){
-    if(c.energy <= 0){
-        c.die();
-        return;
-    }
+    // Bind key/click events
+    bind: function(){
+        document.addEventListener('keydown', function(event) {            
+            switch(event.code){
+                case 'Pause':
+                    if(App.paused){
+                        App.startUpdate();
+                        App.draw();
+                    }else{
+                        App.pause();
+                    }
+                    break;
+                case 'ArrowRight':
+                    App.changeSpeed(10);
+                    break;
+                case 'ArrowLeft':
+                    App.changeSpeed(-10);
+                    break;
+                case 'KeyW':
+                    ctx.translate(0, 5);
+                    break;
+                case 'KeyA':
+                    ctx.translate(5, 0);
+                    break;
+                case 'KeyS':
+                    ctx.translate(0, -5);
+                    break;
+                case 'KeyD':
+                    ctx.translate(-5, 0);
+                    break;
+            } 
+        }); 
 
-    // Reset sensory input    
-    c.brain.inputs = [];    
+        var mouseIsDown = false;
+        var dragStart = {x: 0, y: 0};
+        var dragEnd = {x: 0, y: 0};
+ 
+        canvas.onmousedown = function(e){
+            dragStart.x = e.pageX - canvas.offsetLeft;
+            dragStart.y = e.pageY - canvas.offsetTop;
 
-    // Check all sensors
-    for(var i = 0; i < c.parts.length; i++){
-        let sensor = c.parts[i];
-        if(!sensor.isSensor) continue;
-        sensor.sense(); // Sense the world
-        for(var j = 0; j < sensor.inputs.length; j++){ 
-            c.brain.inputs.push(sensor.inputs[j]); // Send data to brain
-        }        
-    }
-
-    // Yaaargh! Fire the synapses
-    let res = c.brain.fire();
-
-    // TODO: Brain orders should be dynamic for the output parts available
-    // Limit the brain's demands with physical limitations
-    let speed = (c.direction.m+res.speed > c.traits.speed) ? c.traits.speed : c.direction.m+res.speed;
-    if(speed < 0) speed = 0;  
-
-    let turn = (res.turn > c.traits.turn) ? c.traits.turn : res.turn;
-    if(turn < -c.traits.turn) turn = -c.traits.turn;    
-    
-
-    // Carry out the orders 
-    c.move(turn, speed); 
-    c.grow(); 
-
-    for(var i = 0; i < c.parts.length; i++){
-        let part = c.parts[i];
-
-        // Update part location
-        part.x = c.x + c.radius*part.distance*Math.cos(c.direction.a - part.angle);
-        part.y = c.y + c.radius*part.distance*Math.sin(c.direction.a - part.angle);
-        
-        // Act upon the world if capable
-        if(!part.isSensor) part.act(c);             
-    }
-
-    // Attempt to reproduce if creature limit is not hit
-    if(Object.keys(creatures).length < maxCreatures){
-        c.reproducer.reproduce(c); 
-    }
-
-    // TODO: After actions have been taken, update creature state
-
-    // Basic collisions
-    for(j in creatures) {
-        var c2 = creatures[j];
-        if(c2===c) continue;
-        var d= Math.sqrt(Math.pow(c.x-c2.x,2) + Math.pow(c.y-c2.y,2));
-        var overlap= c.radius+c2.radius-d;
-        if(overlap>0 && d>1){
-            //one creature pushes on another proportional to its speed and size.
-            var aggression= c2.direction.m*c2.radius/(c.direction.m*c.radius+c2.direction.m*c2.radius);
-            if(c.direction.m<0.01 && c2.direction.m<0.01) aggression=0.5;
-            var ff2= (overlap*aggression)/d;
-            var ff1= (overlap*(1-aggression))/d;
-            c2.x+= (c2.x-c.x)*ff2;
-            c2.y+= (c2.y-c.y)*ff2;
-            c.x-= (c2.x-c.x)*ff1;
-            c.y-= (c2.x-c.x)*ff1;
+            mouseIsDown = true;
         }
-    }
-}
+        canvas.onmouseup = function(e){
+            if(mouseIsDown) mouseClick(e);
 
-/**
- * @param {Creature} c - Creature being drawn
- */        
-function drawCreature(c){               
-    if(c.selected){
-        ctx.fillStyle = 'red';
-        ctx.beginPath();
-        ctx.arc(c.x, c.y, c.radius+2, 0, 2 * Math.PI);
-        ctx.fill();  
-    }
-    // ctx.drawImage(c.img, c.x, c.y, c.img.width*c.scaleFactor, c.img.height*c.scaleFactor); 
-    // Draw body
-    var gradient = ctx.createRadialGradient(c.x, c.y, c.radius*0.1, c.x, c.y, c.radius);
-    gradient.addColorStop(0, 'skyblue');
-    gradient.addColorStop(1, 'dodgerblue');
-    ctx.beginPath();
-    ctx.arc(c.x, c.y, c.radius, 0, 2 * Math.PI);
-    ctx.fillStyle = gradient;
-    ctx.fill(); 
+            mouseIsDown = false;
+        }
 
-    // Draw parts
-    for(var i = 0; i < c.parts.length; i++){
-        let part = c.parts[i];
-        if(!part.locatable) continue;
-        ctx.beginPath();
-        ctx.arc(part.x, part.y, part.radius, 0, 2 * Math.PI);
-        ctx.fillStyle = `rgb(${part.colour.r}, ${part.colour.g}, ${part.colour.b})`;
-        ctx.fill(); 
-    }
+        canvas.onmousemove = function(e){
+            if(!mouseIsDown) return;
 
-    // TODO: add animation to sensory input
-    // // Colour eyes 
-    // let colour = Math.round(c.brain.inputs.sL*255.0); 
-    // if(colour>255) colour=255;
-    // ctx.beginPath();
-    // ctx.arc(Lx, Ly, eyeGap*2, 0, 2 * Math.PI);
-    // ctx.fillStyle = 'rgb('+colour+','+colour+','+colour+')';
-    // ctx.fill(); 
-
-    // colour = Math.round(c.brain.inputs.sR*255.0); 
-    // if(colour>255) colour=255;
-    // ctx.beginPath();
-    // ctx.arc(Rx, Ry, eyeGap*2, 0, 2 * Math.PI);
-    // ctx.fillStyle = 'rgb('+colour+','+colour+','+colour+')';
-    // ctx.fill(); 
-
-    // Draw energy bar
-    ctx.fillStyle = 'khaki';
-    let barWidth = (c.energy >= c.reproducer.breedingEnergy) ? 2*c.radius : c.energy / c.reproducer.breedingEnergy * 2*c.radius;         
-    ctx.fillRect(c.x-c.radius, c.y + c.radius + 4, barWidth, 4);            
-}
-
-
-// Set initial conditions
-function buildWorld(creatureCount, nutrientCount){
-    while(creatureCount){
-        new Creature()
-        creatureCount--;
-        
-    }
-
-    while(nutrientCount){
-        new Nutrient()
-        nutrientCount--;
-    }
-}
-
-// Process game logic
-function process(){
-
-    if(Object.keys(creatures).length < minCreatures){
-        // for(var i in creatures){ // inherit from last creatures
-            new Creature() // new Creature(creatures[i])
-        // }        
-    }
-
-    environment.update();
-
-    for(var id in creatures){
-        updateCreature(creatures[id]);
-    }
-}
-
-// Draw canvas
-function draw(){
-    paused = false;
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas       
-
-    environment.draw();
-
-    for(var id in creatures){
-        drawCreature(creatures[id]);
-    }
-    
-    if(!paused) animation = window.requestAnimationFrame(draw);
-}        
-
-// Pause Simulation
-function pause(){
-    clearInterval(processing);
-    window.cancelAnimationFrame(animation);
-    paused = true;
-} 
-
-function startProcess(){
-    $('#fps').text(processFPS);
-    processing = setInterval(process, 1000/processFPS);
-}
-
-function init(){ 
-    buildWorld(12, 30);
-    buildStatsUI();  
-    startProcess();
-    draw();
-}
-
-function changeSpeed(change){
-    clearInterval(processing);
-    processFPS += change;
-    if(processFPS < 10) processFPS = 10;
-    startProcess();
-}
-
-
-document.addEventListener('keydown', function(event) {
-    switch(event.code){
-        case 'Pause':
-            if(paused){
-                startProcess();
-                draw();
-            }else{
-                pause();
+            dragEnd = {
+                x: e.pageX - canvas.offsetLeft,
+                y: e.pageY - canvas.offsetTop
             }
-            break;
-        case 'ArrowRight':
-            changeSpeed(10);
-            break;
-        case 'ArrowLeft':
-            changeSpeed(-10);
-            break;
-    } 
-}); 
+
+            ctx.translate(dragEnd.x - dragStart.x, dragEnd.y - dragStart.y);
+
+            dragStart = dragEnd;
+
+            return false;
+        }
+
+        function mouseClick(e){
+            // click action
+        }
+    },
+
+    // Set initial conditions
+    buildWorld: function(creatureCount, nutrientCount){
+        while(creatureCount){
+            new Creature()
+            creatureCount--;
+            
+        }
+
+        while(nutrientCount){
+            new Nutrient()
+            nutrientCount--;
+        }
+    },
+
+    // Process game logic
+    update: function(){
+
+        if(Object.keys(Life.creatures).length < minCreatures){
+            // for(var i in creatures){ // inherit from last creatures
+                new Creature() // new Creature(creatures[i])
+            // }        
+        }
+
+        Environment.update();
+        
+        Life.update();
+        
+    },
+
+    // Draw canvas
+    draw: function(){
+        App.paused = false; 
+
+        App.clear();
+
+        Environment.draw();
+
+        Life.draw();
+        
+        if(!App.paused) drawing = window.requestAnimationFrame(App.draw);
+    },   
+
+    clear: function(){
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas          
+        ctx.restore();
+    },
+
+    startUpdate: function(){
+        $('#fps').text(App.updateFPS);
+        updating = setInterval(App.update, 1000/App.updateFPS);
+    },
+
+    // Pause Simulation
+    pause: function(){
+        clearInterval(updating);
+        window.cancelAnimationFrame(drawing);
+        App.paused = true;
+    }, 
+
+    // Change updating (logic) speed
+    changeSpeed: function(change){
+        clearInterval(updating);
+        App.updateFPS += change;
+        if(App.updateFPS < 10) App.updateFPS = 10;
+        this.startUpdate();
+    }
+}

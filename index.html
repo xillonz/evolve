@@ -48,8 +48,10 @@
             <div id="inheritable-average"></div>
         </div>
     </div>    
-    <script src="view/stats.js"></script>
-    <script src="helpers.js"></script>    
+    
+    <script src="gpu.js"></script> <!-- GPU Processing -->
+    <script src="view/stats.js"></script> <!-- Stats UI -->
+    <script src="helpers/helpers.js"></script> <!-- Helper Functions -->   
     
     <script src="models/environment/Nutrient.js"></script>
     <script src="models/environment/Toxin.js"></script>
@@ -61,22 +63,26 @@
     <script src="models/life/parts/consumers/Mouth.js"></script>
     <script src="models/life/parts/sensors/Sensor.js"></script>
     <script src="models/life/parts/sensors/Ear.js"></script>
-    <script src="environment.js"></script>
+    <script src="models/life/parts/sensors/Nerves.js"></script>
+    <script src="services/life.js"></script>
+    <script src="services/environment.js"></script>
     <script src="app.js"></script>
     <script> 
-        (function() {init();})();        
+        (function() {App.init();})();        
 
-        // TODO:
-        //  - Clean up app.js
+        // TODO:     
         //  - Add energy use to brain and parts
+        //  - Give parts quality/size, when they go below a min quality/size remove them
         //  - Balance nutrients
+        //  - Balance brain mutations
         //  - change breeding requirements, dont just breed upon eating food, or at least have a cooldown (kind of done)
-        //  - Remove silly jquery
-        //  - Add more traits
+        //  - Rebuild stats UI
         //  - Add world events
         //  - Add more complex environment
         //  - Add predation
         //  - Add genetic similarity requirements for breeding (if using paired breeding)
+        //  - Allow brain evolution
+        //  - GPU acceleration 
 
     </script>
 </body>

@@ -1,7 +1,6 @@
 // --- Toxin Constants ---
 var latestToxinId = 0;
-var toxins = {};
-const toxinSpawnChance = 0.002; // Chance of spawning toxin every tick
+const toxinSpawnChance = 0.01; // Chance of spawning toxin every tick
 const minToxicity = 1;
 const maxToxicity = 4;
 
@@ -10,13 +9,13 @@ class Toxin{
     constructor(){
         this.x = randomInt(0, canvas.width);
         this.y = randomInt(0, canvas.height); 
-        this.colour = 'lime';
+        this.colour = 'tomato';
         this.toxicity = randomFloat(minToxicity, maxToxicity);   
     
         // Toxin ID
         latestToxinId += 1;
         this.id = latestToxinId;
         
-        toxins[this.id] = this;
+        Environment.toxins[this.id] = this;
     }  
 }  

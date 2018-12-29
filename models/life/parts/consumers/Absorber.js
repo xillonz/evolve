@@ -15,8 +15,8 @@ class Absorber extends Part{
 
     // Absorb
     act(){
-        for(let id in nutrients){
-            let nutrient = nutrients[id];   
+        for(let id in Environment.nutrients){
+            let nutrient = Environment.nutrients[id];   
             if(withinRadius(nutrient.x, nutrient.y, this.creature.x, this.creature.y, this.creature.radius*this.absorptionRadius)){
                 this.creature.energy += this.absorptionRate;
                 nutrient.energy -= this.absorptionRate;           

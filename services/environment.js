@@ -1,36 +1,42 @@
 const maxNutrients = 500;
+const maxToxins = 200;
 
-var environment = {
+var Environment = {
+    mapHeight: 2000,
+    mapWidth: 2000,
+    nutrients: {},
+    toxins: {},
+
     update: function(){
         // Update nutrients
         this.spawnNutrient();
         this.spawnToxin();
     },
 
+    draw: function(){
+        for(var id in this.nutrients){
+            this.drawNutrient(this.nutrients[id]);
+        }
+    
+        for(var id in this.toxins){
+            this.drawToxin(this.toxins[id]);
+        }
+    },
+
     spawnNutrient: function (){            
-        if(Object.keys(nutrients).length < maxNutrients && Math.random() <= nutrientSpawnChance) new Nutrient();            
+        if(Object.keys(this.nutrients).length < maxNutrients && Math.random() <= nutrientSpawnChance) new Nutrient();            
     },
     
     spawnToxin: function (){            
-        if(Math.random() <= toxinSpawnChance) new Toxin();            
-    },
+        if(Object.keys(this.toxins).length < maxNutrients &&Math.random() <= toxinSpawnChance) new Toxin();            
+    },    
 
-    draw: function(){
-        for(var id in nutrients){
-            this.drawNutrient(nutrients[id]);
-        }
-    
-        for(var id in toxins){
-            this.drawToxin(toxins[id]);
-        }
-    },
-
-        /**
+    /**
      * @param {Nutrient} n - Nutrient being drawn
      */        
     drawNutrient: function (n){ 
         if(n.energy <= 0){
-            delete nutrients[n.id];
+            delete this.nutrients[n.id];
             return;
         }
 

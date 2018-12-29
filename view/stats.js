@@ -1,8 +1,8 @@
 // TODO: rebuild this whole file
 
 function showCreatureInfo(c){
-    for(let i in creatures){
-        creatures[i].selected = false;
+    for(let i in Life.creatures){
+        Life.creatures[i].selected = false;
     }
     c.selected = true;
     $('#generation').text(c.generation);
@@ -24,10 +24,10 @@ function buildStatsUI(){
     setInterval(function(){
         let totals = {};
         let count = 0;
-        for(let i in creatures){
+        for(let i in Life.creatures){
             for(var j = 0; j < inheritable.length; j++){
                 if(!totals[inheritable[j]]) totals[inheritable[j]] = 0;
-                totals[inheritable[j]] += creatures[i].traits[inheritable[j]];                    
+                totals[inheritable[j]] += Life.creatures[i].traits[inheritable[j]];                    
             }           
             count++;
         }
@@ -44,8 +44,8 @@ function buildStatsUI(){
         let rect = canvas.getBoundingClientRect();
         let x = event.clientX - rect.left;
         let y = event.clientY - rect.top;
-        for(let i in creatures){
-            let c = creatures[i];
+        for(let i in Life.creatures){
+            let c = Life.creatures[i];
             if(withinArea(x, y, c.x, c.y, c.radius, c.radius)){
                 showCreatureInfo(c);
             }

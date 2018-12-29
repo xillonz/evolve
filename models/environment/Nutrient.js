@@ -1,9 +1,8 @@
 // --- Nutrient Constants ---
 var latestNutrientId = 0;
-var nutrients = {};
 const nutrientSpawnChance = 0.08; // Chance of spawning nutrient every tick
-const minSize = 300;
-const maxSize = 500;
+const minSize = 250;
+const maxSize = 450;
 
 // Nutrient constructor
 class Nutrient{
@@ -17,7 +16,7 @@ class Nutrient{
         latestNutrientId += 1;
         this.id = latestNutrientId;
         
-        nutrients[this.id] = this;
+        Environment.nutrients[this.id] = this;
     }    
 
     size(){

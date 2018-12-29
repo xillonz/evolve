@@ -1,6 +1,5 @@
 // --- Creature constants ---
 var latestCreatureId = 0;
-var creatures = {};
 const baseGenome = {
     speed: 1,
     turn: 0.02,
@@ -12,8 +11,6 @@ const energyDrainConstant = 1; // Background energy drain (if the creature was s
 
 const mutationChance = 0.2; // Chance of a mutation occurring upon breeding
 const mutationFactor = 0.1; // How large a change can occur within the mutation
-
-var mouthMutation = false;
 
 // Mutation Helper
 function mutate(val, min, max){
@@ -89,7 +86,7 @@ class Creature{
         latestCreatureId += 1;
         this.id = latestCreatureId;
 
-        creatures[this.id] = this;
+        Life.creatures[this.id] = this;
 
         // Update the stats to that of the parent with mutations
         if(parent != 'undefined' && parent instanceof Creature) this.genesis(parent);
@@ -132,10 +129,11 @@ class Creature{
 
     checkAbnormalities(abnormalityBonus){        
         // Randomly aquire new parts
-        for(var i in partClasses){
-            if(countClass(this.parts, partClasses[i]) >= partClasses[i].limit()) continue;
-            if(Math.random() < partClasses[i].mutationChance() + abnormalityBonus){
-                var newPart = new partClasses[i](this);
+        for(var i in Life.partClasses){
+            let C = Life.partClasses[i];
+            if(countClass(this.parts, C) >= C.limit()) continue;
+            if(Math.random() < C.mutationChance() + abnormalityBonus){
+                var newPart = new C(this);
                 this.parts.push(newPart);
             }
         }    
@@ -182,6 +180,6 @@ class Creature{
     }
 
     die(){
-        delete creatures[this.id];
+        delete Life.creatures[this.id];
     }
 } 
