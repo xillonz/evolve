@@ -86,6 +86,14 @@ var App = {
             return false;
         }
 
+        canvas.onwheel = function(e){
+            if(e.wheelDelta>0){
+                ctx.scale(1.2, 1.2)
+            }else{
+                ctx.scale(0.8, 0.8)
+            }
+        }
+
         function mouseClick(e){
             // click action
         }

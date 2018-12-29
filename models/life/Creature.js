@@ -61,8 +61,8 @@ class Creature{
         
 
         // Starting position
-        this.x = randomInt(0, canvas.width);
-        this.y = randomInt(0, canvas.height);
+        this.x = randomInt(0, Environment.width);
+        this.y = randomInt(0, Environment.height);
 
         this.direction = randomVector(0, 360, this.traits.speed);
 
@@ -164,10 +164,10 @@ class Creature{
         this.y += this.direction.y; 
 
         // Teleport to otherside of map
-        if(this.x<0) this.x = canvas.width;
-        if(this.x>canvas.width) this.x= 0;
-        if(this.y<0) this.y= canvas.height;
-        if(this.y>canvas.height) this.y= 0;
+        if(this.x<0) this.x = Environment.width;
+        if(this.x>Environment.width) this.x= 0;
+        if(this.y<0) this.y= Environment.height;
+        if(this.y>Environment.height) this.y= 0;
 
         this.energy -= energyDrainFactor*this.radius*this.direction.m*this.direction.m + energyDrainConstant; // Reduce creatures energy: D.m.v²+C
     }

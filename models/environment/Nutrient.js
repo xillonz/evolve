@@ -7,8 +7,8 @@ const maxSize = 450;
 // Nutrient constructor
 class Nutrient{
     constructor(){
-        this.x = randomInt(0, canvas.width);
-        this.y = randomInt(0, canvas.height); 
+        this.x = randomInt(0, Environment.width);
+        this.y = randomInt(0, Environment.height); 
         this.colour = 'darkseagreen';
         this.energy = randomInt(minSize, maxSize);   
     

@@ -2,8 +2,8 @@ const maxNutrients = 500;
 const maxToxins = 200;
 
 var Environment = {
-    mapHeight: 2000,
-    mapWidth: 2000,
+    width: 1200,
+    height: 900,
     nutrients: {},
     toxins: {},
 
@@ -14,13 +14,25 @@ var Environment = {
     },
 
     draw: function(){
+        this.drawEdges();
+
         for(var id in this.nutrients){
             this.drawNutrient(this.nutrients[id]);
         }
     
         for(var id in this.toxins){
             this.drawToxin(this.toxins[id]);
-        }
+        }        
+    },
+
+    drawEdges: function(){
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, this.height);
+        ctx.lineTo(this.width, this.height);
+        ctx.lineTo(this.width, 0);
+        ctx.lineTo(0, 0);
+        ctx.stroke();
     },
 
     spawnNutrient: function (){            
