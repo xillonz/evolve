@@ -33,13 +33,17 @@ function mutateAngle(val, min, max){
     if(typeof min === 'undefined') min = 0;
     if(typeof max === 'undefined') max = 360;
 
+    // Convert to Radians
+    min *= (Math.PI / 180)
+    max *= (Math.PI / 180)
+
     let mutation = 1;
     if(Math.random() < mutationChance){
         let factor = randomFloat(0, mutationFactor);
         mutation = Math.random() < 0.5 ? 1 - factor : factor + 1; 
     }
 
-    val *= mutation * (Math.PI / 180);
+    val *= mutation;
 
     if(val>2*Math.PI) val = val-2*Math.PI;
     if(val<0) val = 2*Math.PI+val;

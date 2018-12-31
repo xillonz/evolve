@@ -1,12 +1,12 @@
 class Mouth extends Part{
-    static mutationChance() { return 0.2; }
+    static mutationChance() { return 1; }
     static limit(){ return 1; }
 
     constructor(creature){
         super(creature);
 
         this.radius = 4;
-        this.distance = 0.8; // Distance from center in units of creature size
+        this.distance = 1.2; // Distance from center in units of creature size
         this.angle = randomFloat(0, 2*Math.PI); // Angle from front of creature
         this.x = 0;
         this.y = 0;

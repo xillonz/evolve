@@ -79,19 +79,39 @@ var App = {
                 y: e.pageY - canvas.offsetTop
             }
 
-            ctx.translate(dragEnd.x - dragStart.x, dragEnd.y - dragStart.y);
+            let dx = dragEnd.x - dragStart.x;
+            let dy = dragEnd.y - dragStart.y;
+
+            let curTransform = ctx.getTransform();   
+            
+            let borderSize = 300;
+
+            if(curTransform.e + dx > borderSize*curTransform.a && dx > 0) dx = 0;
+            if(curTransform.f + dy > borderSize*curTransform.a && dy >0) dy = 0;
+            if(curTransform.e + dx - canvas.width < -1*(Environment.width + borderSize)*curTransform.a && dx < 0) dx = 0;
+            if(curTransform.f + dy - canvas.height < -1*(Environment.height + borderSize)*curTransform.a  && dy < 0) dy = 0;
+
+            ctx.translate(dx/curTransform.a, dy/curTransform.d);
 
             dragStart = dragEnd;
 
             return false;
         }
 
+        // Zoom
         canvas.onwheel = function(e){
+            var mousePos = getMousePos(canvas, e);
+
+            ctx.translate(mousePos.x, mousePos.y);
+
+            // TODO: consider adding zoom limits
             if(e.wheelDelta>0){
                 ctx.scale(1.2, 1.2)
             }else{
                 ctx.scale(0.8, 0.8)
             }
+
+            ctx.translate(-mousePos.x, -mousePos.y);
         }
 
         function mouseClick(e){
