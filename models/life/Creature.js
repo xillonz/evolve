@@ -101,6 +101,8 @@ class Creature{
         // If its generation 0, build the default brain
         if(!hasParent) this.brain.buildDefault();
     }   
+
+    // TODO: 
     
     genesis(parent){
         // Inherit traits
@@ -118,15 +120,15 @@ class Creature{
 
         this.traits = mutatedTraits;
 
-        // Inherit the parents brain
-        this.brain.inherit(parent.brain);
-
         // Inherit parts
         for(var i=0; i<parent.parts.length;i++){
             let newPart = new parent.parts[i].constructor(this);
             this.parts.push(newPart);
             newPart.inherit(parent.parts[i])
         }    
+
+        // Inherit the parent's brain
+        this.brain.inherit(parent.brain);
 
         // Update child stats
         this.parentId = parent.id; 
@@ -135,6 +137,7 @@ class Creature{
         this.y = parent.y+parent.radius*2;
     }
 
+    // TODO: When adding new parts, somehow insert them into the neuron mapping whilst retaining the parents synapses for the old parts
     checkAbnormalities(abnormalityBonus){        
         // Randomly aquire new parts
         for(var i in Life.partClasses){

@@ -23,24 +23,6 @@ var Life = {
         // Reset sensory input    
         c.brain.inputs = [];  
         
-        // Temporarily manually add speed and turn outputs to brain TODO: remove when there are movement parts
-        c.brain.outputs = [0, 0];
-    
-        // Check all parts and pass in sense data from sensors and prep part inputs
-        for(var i = 0; i < c.parts.length; i++){
-            let part = c.parts[i];
-            if(part.isSensor){
-                part.sense(); // Sense the world
-                for(var j = 0; j < part.outputs.length; j++){ 
-                    c.brain.inputs.push(part.outputs[j]); // Send data to brain
-                }   
-            }else if(part.inputs){
-                for(var j = 0; j < part.inputs.length; j++){
-                    c.brain.outputs.push(0);
-                }
-            }                 
-        }
-    
         // Yaaargh! Fire the synapses
         let res = c.brain.fire();
     

@@ -16,17 +16,18 @@ class Brain{
         this.neurons = [];
     }
 
-    buildDefault(){
-         // Temporarily manually add speed and turn outputs to brain TODO: remove when there are movement parts
+    // Rebuild the I/O connections whilst also taking on any input
+    setConnections(){
+        // Temporarily manually add speed and turn outputs to brain TODO: remove when there are movement parts
         this.outputs = [0, 0];
 
         // Check all parts and prep input and output count
         for(var i = 0; i < this.creature.parts.length; i++){
             let part = this.creature.parts[i];
             if(part.outputs){
-                part.sense(); // Sense for the sake of collecting the right count of inputs
+                part.sense(); // Take sensory input (at least for getting the right input count)
                 for(var j = 0; j < part.outputs.length; j++){ 
-                    this.inputs.push(0);
+                    this.inputs.push(part.outputs[j]);
                 }   
             }else if(part.inputs){
                 for(var j = 0; j < part.inputs.length; j++){
@@ -34,6 +35,61 @@ class Brain{
                 }
             }                 
         }
+    }
+
+    fire(){
+        this.setConnections();
+
+        let inputCount = this.inputs.length;
+        let outputCount = this.outputs.length;
+        let totalNeurons = inputCount + this.hiddenNeuronCount + outputCount;
+
+        let biasCount = 5;
+        let biasZeroCount = 1;
+
+        // TODO: put this in unit test
+        if(biasZeroCount >= biasCount) console.warn('Zero Biases are greater than One Biases, there will be no bias system')
+
+        // Assign input senses to firstnuerons in list (artificially chosen as "input" neurons)
+        for(let i=inputCount+biasCount;i<totalNeurons;i++){
+            this.neurons[i].activity = 0;
+        }
+
+        for(let i = 0; i < this.inputs.length; i++){
+            this.neurons[i].activity = this.inputs[i];
+        }
+
+        for(let i = biasZeroCount; i < biasCount; i++){
+            // Give some extra neurons some bias of 1 or 0 
+            this.neurons[inputCount+i].activity = 1;
+        }
+
+        for(let i=inputCount+5;i<totalNeurons;i++){
+            let neuron = this.neurons[i];           
+            let a = 0; //Activation value
+            // Check all the synapse links on this neuron
+            for(let j=0;j<neuron.synapses.length;j++){
+                let synapse = neuron.synapses[j];
+                // add up all their weighted values (link weight with target neuron activity)
+                a += synapse.weight*this.neurons[synapse.link].activity;
+            }       
+
+            // Sigmoid normalise and set as neuron activation value
+            neuron.activity = (i < totalNeurons - outputCount - 1) ? 1.0/(1.0 + Math.exp(-a)) : a;   
+        }
+
+        // Artificially treat the final neurons as the output
+        let outputs = this.neurons.slice(Math.max(totalNeurons - outputCount, 1));
+
+        for(var i = 0; i < outputs.length; i++){        
+            this.outputs[i] = outputs[i].activity - outputs[i].activity/2;     
+        }
+        
+        return this.outputs;
+    }
+
+    buildDefault(){  
+        this.setConnections();
 
         let inputCount = this.inputs.length;
         let outputCount = this.outputs.length;
@@ -67,51 +123,13 @@ class Brain{
         
     }
 
-    fire(){
+    inherit(brain){
+        this.setConnections();
+
         let inputCount = this.inputs.length;
         let outputCount = this.outputs.length;
         let totalNeurons = inputCount + this.hiddenNeuronCount + outputCount;
 
-        // Assign input senses to firstnuerons in list (artificially chosen as "input" neurons)
-        for(let i=inputCount+5;i<totalNeurons;i++){
-            this.neurons[i].activity = 0;
-        }
-
-        for(let i = 0; i < this.inputs.length; i++){
-            this.neurons[i].activity = this.inputs[i];
-        }
-
-        // Give some extra neurons some bias of 1 or 0 
-        this.neurons[inputCount+1].activity = 1;
-        this.neurons[inputCount+2].activity = 1;
-        this.neurons[inputCount+3].activity = 1;
-        this.neurons[inputCount+4].activity = 1;
-
-        for(let i=inputCount+5;i<totalNeurons;i++){
-            let neuron = this.neurons[i];           
-            let a = 0; //Activation value
-            // Check all the synapse links on this neuron
-            for(let j=0;j<neuron.synapses.length;j++){
-                let synapse = neuron.synapses[j];
-                // add up all their weighted values (link weight with target neuron activity)
-                a += synapse.weight*this.neurons[synapse.link].activity;
-            }       
-
-            // Sigmoid normalise and set as neuron activation value
-            neuron.activity = (i < totalNeurons - outputCount - 1) ? 1.0/(1.0 + Math.exp(-a)) : a;   
-        }
-
-        // Artificially treat the final neurons as the output
-        let outputs = this.neurons.slice(Math.max(totalNeurons - outputCount, 1));
-
-        for(var i = 0; i < outputs.length; i++){        
-            this.outputs[i] = outputs[i].activity - outputs[i].activity/2;     
-        }
-        
-        return this.outputs;
-    }
-
-    inherit(brain){
         for (var i=0;i<totalNeurons;i++) {
             this.neurons[i] = {
                 activity: 0,
