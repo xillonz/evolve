@@ -145,7 +145,8 @@ var App = {
         Environment.update();
         
         Life.update();
-        
+
+        updating = setTimeout(App.update, 1000/App.updateFPS);        
     },
 
     // Draw canvas
@@ -170,19 +171,19 @@ var App = {
 
     startUpdate: function(){
         $('#fps').text(App.updateFPS);
-        updating = setInterval(App.update, 1000/App.updateFPS);
+        updating = setTimeout(App.update, 1000/App.updateFPS);
     },
 
     // Pause Simulation
     pause: function(){
-        clearInterval(updating);
+        clearTimeout(updating);
         window.cancelAnimationFrame(drawing);
         App.paused = true;
     }, 
 
     // Change updating (logic) speed
     changeSpeed: function(change){
-        clearInterval(updating);
+        clearTimeout(updating);
         App.updateFPS += change;
         if(App.updateFPS < 10) App.updateFPS = 10;
         this.startUpdate();

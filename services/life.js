@@ -21,27 +21,34 @@ var Life = {
         }
     
         // Reset sensory input    
-        c.brain.inputs = [];    
+        c.brain.inputs = [];  
+        
+        // Temporarily manually add speed and turn outputs to brain TODO: remove when there are movement parts
+        c.brain.outputs = [0, 0];
     
-        // Check all sensors
+        // Check all parts and pass in sense data from sensors and prep part inputs
         for(var i = 0; i < c.parts.length; i++){
-            let sensor = c.parts[i];
-            if(!sensor.isSensor) continue;
-            sensor.sense(); // Sense the world
-            for(var j = 0; j < sensor.inputs.length; j++){ 
-                c.brain.inputs.push(sensor.inputs[j]); // Send data to brain
-            }        
+            let part = c.parts[i];
+            if(part.isSensor){
+                part.sense(); // Sense the world
+                for(var j = 0; j < part.outputs.length; j++){ 
+                    c.brain.inputs.push(part.outputs[j]); // Send data to brain
+                }   
+            }else if(part.inputs){
+                for(var j = 0; j < part.inputs.length; j++){
+                    c.brain.outputs.push(0);
+                }
+            }                 
         }
     
         // Yaaargh! Fire the synapses
         let res = c.brain.fire();
     
-        // TODO: Brain orders should be dynamic for the output parts available
-        // Limit the brain's demands with physical limitations
-        let speed = (c.direction.m+res.speed > c.traits.speed) ? c.traits.speed : c.direction.m+res.speed;
+        // Limit the brain's demands with physical limitations TODO: should be inside the part classes (when exists)
+        let speed = (c.direction.m+res[0] > c.traits.speed) ? c.traits.speed : c.direction.m+res[0];
         if(speed < 0) speed = 0;  
     
-        let turn = (res.turn > c.traits.turn) ? c.traits.turn : res.turn;
+        let turn = (res[1] > c.traits.turn) ? c.traits.turn : res[1];
         if(turn < -c.traits.turn) turn = -c.traits.turn;    
         
     

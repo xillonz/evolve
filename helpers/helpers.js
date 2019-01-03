@@ -15,6 +15,19 @@ function distance(x1, y1, x2, y2, root){
     return (root) ? Math.sqrt(distancesquared) : distancesquared;
 }
 
+function getAngleRad(x1,y1,x2,y2) {
+    var angleRad = Math.atan((y1-y2)/(x1-x2));
+
+    return(angleRad);
+}
+
+function getAngleDeg(ax,ay,bx,by) {
+    var angleRad = Math.atan((ay-by)/(ax-bx));
+    var angleDeg = angleRad * 180 / Math.PI;
+
+    return(angleDeg);
+}
+
 // Check if a location is within a rectangular area given top left corner pos and dimensions of rectangle
 function withinArea(x, y, xMin, yMin, width, height){
     return x > xMin && x < xMin + width && y > yMin && y < yMin + height;

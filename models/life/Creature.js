@@ -62,7 +62,6 @@ class Creature{
         this.brain = new Brain(this);    
         this.reproducer = new Reproducer(this);    
         this.parts = [];
-        
 
         // Starting position
         this.x = randomInt(0, Environment.width);
@@ -92,10 +91,15 @@ class Creature{
 
         Life.creatures[this.id] = this;
 
+        let hasParent = parent != 'undefined' && parent instanceof Creature;
+
         // Update the stats to that of the parent with mutations
-        if(parent != 'undefined' && parent instanceof Creature) this.genesis(parent);
+        if(hasParent) this.genesis(parent);        
 
         this.checkAbnormalities(0);
+
+        // If its generation 0, build the default brain
+        if(!hasParent) this.brain.buildDefault();
     }   
     
     genesis(parent){

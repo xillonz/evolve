@@ -5,44 +5,51 @@ class Nerves extends Sensor{
     constructor(creature){
         super(creature); 
         this.locateable = false;
-
     }
 
-    // TODO: update nerve sense calculations to handle direction and squash
+    // TODO: update nerve sense calculations to handle direction
     sense(){
-        this.inputs = [];
+        this.outputs = [];
+        let count = 0;
         let nutrientInput = 0;
         for(let id in Environment.nutrients){
             let nutrient = Environment.nutrients[id];
-            if(withinRadius(nutrient.x, nutrient.y, this.creature.x, this.creature.y, this.creature.radius+1)){
+            if(withinRadius(nutrient.x, nutrient.y, this.creature.x, this.creature.y, this.creature.radius+2)){
                 // pass sum of Sense data to creature's brain: M.e^(-S.d^2)
-                nutrientInput += 1;                
+                count += 1;   
+                nutrientInput += getAngleRad(nutrient.x, nutrient.y, this.creature.x, this.creature.y);
             }            
         }
-
-        this.inputs.push(nutrientInput);
+        let result = (count) ? nutrientInput/count : 0;
+        this.outputs.push(result);
         
+        count = 0;
         let toxinInput = 0;
         for(let id in Environment.toxins){
             let toxin = Environment.toxins[id];
-            if(withinRadius(toxin.x, toxin.y, this.creature.x, this.creature.y, this.creature.radius+1)){
+            if(withinRadius(toxin.x, toxin.y, this.creature.x, this.creature.y, this.creature.radius+2)){
                 // pass sum of Sense data to creature's brain: M.e^(-S.d^2)
-                toxinInput += 1;                
+                count += 1;  
+                toxinInput += getAngleRad(toxin.x, toxin.y, this.creature.x, this.creature.y);
             }            
         }
 
-        this.inputs.push(toxinInput);
+        result = (count) ? toxinInput/count : 0;
+        this.outputs.push(result);
 
+        count = 0;
         let creatureInput = 0;
         for(let id in Life.creatures){
             if(id == this.creature.id) continue;
             let creature = Life.creatures[id];
-            if(withinRadius(creature.x, creature.y, this.creature.x, this.creature.y, this.creature.radius+1)){                
-                creatureInput += 1;                
+            if(withinRadius(creature.x, creature.y, this.creature.x, this.creature.y, this.creature.radius+2)){  
+                count += 1;                
+                creatureInput += getAngleRad(creature.x, creature.y, this.creature.x, this.creature.y);                
             }            
         }
 
-        this.inputs.push(creatureInput);               
+        result = (count) ? creatureInput/count : 0;
+        this.outputs.push(result);             
     }
 
     inherit(ear){
