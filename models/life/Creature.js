@@ -63,6 +63,10 @@ class Creature{
         this.reproducer = new Reproducer(this);    
         this.parts = [];
 
+        // Temp until movement parts are added TODO: remove when there are movement parts
+        this.turnConnector = new PartConnection();
+        this.speedConnector = new PartConnection();
+
         // Starting position
         this.x = randomInt(0, Environment.width);
         this.y = randomInt(0, Environment.height);
@@ -94,12 +98,13 @@ class Creature{
         let hasParent = parent != 'undefined' && parent instanceof Creature;
 
         // Update the stats to that of the parent with mutations
-        if(hasParent) this.genesis(parent);        
-
-        this.checkAbnormalities(0);
-
-        // If its generation 0, build the default brain
-        if(!hasParent) this.brain.buildDefault();
+        if(hasParent){
+            this.genesis(parent); 
+        }else{
+            // If its generation 0, build the new creature with random parts and a default brain
+            this.checkAbnormalities(0); // Acquire random parts only
+            this.brain.buildDefault();
+        }      
     }   
 
     // TODO: 
@@ -127,6 +132,10 @@ class Creature{
             newPart.inherit(parent.parts[i])
         }    
 
+        this.checkAbnormalities(0);
+
+        // TODO: when parts can dissapear, keep track here of which parts have been removed, and update the brain to remove associated neurons/links
+
         // Inherit the parent's brain
         this.brain.inherit(parent.brain);
 
@@ -146,6 +155,7 @@ class Creature{
             if(Math.random() < C.mutationChance() + abnormalityBonus){
                 var newPart = new C(this);
                 this.parts.push(newPart);
+                this.brain.newParts.push(newPart);
             }
         }    
     }

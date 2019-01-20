@@ -5,11 +5,16 @@ class Nerves extends Sensor{
     constructor(creature){
         super(creature); 
         this.locateable = false;
+
+        this.outputs = {
+            nutrients: new PartConnection(),
+            toxins: new PartConnection(),
+            creatures: new PartConnection(),
+        }
     }
 
     // TODO: update nerve sense calculations to handle direction
-    sense(){
-        this.outputs = [];
+    receiveStimuli(){
         let count = 0;
         let nutrientInput = 0;
         for(let id in Environment.nutrients){
@@ -21,7 +26,7 @@ class Nerves extends Sensor{
             }            
         }
         let result = (count) ? nutrientInput/count : 0;
-        this.outputs.push(result);
+        this.outputs.nutrients.value = result;
         
         count = 0;
         let toxinInput = 0;
@@ -35,7 +40,7 @@ class Nerves extends Sensor{
         }
 
         result = (count) ? toxinInput/count : 0;
-        this.outputs.push(result);
+        this.outputs.toxins.value = result;
 
         count = 0;
         let creatureInput = 0;
@@ -49,7 +54,7 @@ class Nerves extends Sensor{
         }
 
         result = (count) ? creatureInput/count : 0;
-        this.outputs.push(result);             
+        this.outputs.creatures.value = result;           
     }
 
     inherit(ear){

@@ -18,10 +18,16 @@ class Ear extends Sensor{
             g: 250,
             b: 100
         };
+
+
+        this.outputs = {
+            nutrients: new PartConnection(),
+            toxins: new PartConnection(),
+            creatures: new PartConnection(),
+        }
     }
 
-    sense(){
-        this.outputs = [];
+    receiveStimuli(){
         let nutrientInput = 0;
         for(let id in Environment.nutrients){
             let nutrient = Environment.nutrients[id];
@@ -31,7 +37,7 @@ class Ear extends Sensor{
             }            
         }
 
-        this.outputs.push(nutrientInput);
+        this.outputs.nutrients.value = nutrientInput;
         
         let toxinInput = 0;
         for(let id in Environment.toxins){
@@ -42,7 +48,7 @@ class Ear extends Sensor{
             }            
         }
 
-        this.outputs.push(toxinInput);
+        this.outputs.toxins.value = toxinInput;
 
         let creatureInput = 0;
         for(let id in Life.creatures){
@@ -54,7 +60,7 @@ class Ear extends Sensor{
             }            
         }
 
-        this.outputs.push(creatureInput);
+        this.outputs.creatures.value = creatureInput;
 
         // Colour ears based on how much they sense
         let nutrientColour = Math.round(nutrientInput*255.0); 
@@ -68,7 +74,7 @@ class Ear extends Sensor{
             r: toxinColour,
             g: nutrientColour,
             b: creatureColour
-        };                 
+        };             
     }
 
     inherit(ear){

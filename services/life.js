@@ -20,19 +20,25 @@ var Life = {
             return;
         }
     
-        // Reset sensory input    
-        c.brain.inputs = [];  
-        
+        // Sense
+        for(var i = 0; i < c.parts.length; i++){
+            let part = c.parts[i];
+            if(part.outputs){
+                part.sense();
+            }
+        }
+
         // Yaaargh! Fire the synapses
-        let res = c.brain.fire();
+        c.brain.fire();
+        let targetTurn = c.brain.neurons[c.turnConnector.neuronId].activity;
+        let targetSpeed = c.brain.neurons[c.speedConnector.neuronId].activity;        
     
-        // Limit the brain's demands with physical limitations TODO: should be inside the part classes (when exists)
-        let speed = (c.direction.m+res[0] > c.traits.speed) ? c.traits.speed : c.direction.m+res[0];
-        if(speed < 0) speed = 0;  
-    
-        let turn = (res[1] > c.traits.turn) ? c.traits.turn : res[1];
+        // Limit the brain's demands with physical limitations TODO: should be inside the part classes (when exists)        
+        let turn = (targetTurn > c.traits.turn) ? c.traits.turn : targetTurn;
         if(turn < -c.traits.turn) turn = -c.traits.turn;    
-        
+
+        let speed = (c.direction.m+targetSpeed > c.traits.speed) ? c.traits.speed : c.direction.m+targetSpeed;
+        if(speed < 0) speed = 0;  
     
         // Carry out the orders 
         c.move(turn, speed); 
@@ -46,7 +52,7 @@ var Life = {
             part.y = c.y + c.radius*part.distance*Math.sin(c.direction.a - part.angle);
             
             // Act upon the world if capable
-            if(!part.isSensor) part.act(c);             
+            part.behave();             
         }
     
         // Attempt to reproduce if creature limit is not hit
@@ -54,7 +60,7 @@ var Life = {
             c.reproducer.reproduce(c); 
         }
     
-        // TODO: After actions have been taken, update creature state
+        // TODO: After actions have been taken, update creature state (status, health etc)
     
         // Basic collisions
         for(j in this.creatures) {

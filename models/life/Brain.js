@@ -4,161 +4,191 @@ const synapseCount = 10;
 const brainMutationChance = 0.1;
 const brainMutationFactor = 0.3;
 
+const NEURON_TYPES = {
+    HIDDEN: 'H',
+    BIAS: 'B',
+    INPUT: 'I',
+    OUTPUT: 'O'
+}
+
+class Neuron{
+    constructor(type){
+        this.id = '_' + Math.random().toString(36).substr(2, 9);
+        this.type = type;
+        this.activity = 0;
+        this.synapses = []
+    }
+}
+
 class Brain{   
     constructor(creature){
         this.creature = creature;
-
-        this.inputs = [];    
-        this.outputs = [];
+        this.latestNeuronId = 0;
     
         this.hiddenNeuronCount = hiddenNeuronCount;
         this.synapseCount = synapseCount;      
-        this.neurons = [];
+        this.neurons = {};
+
+        // Store changes compared to previous parent during inheritance in order to rewire the brain appropriately
+        this.newParts = []; 
+        this.removedParts = [];
+
+        this.viableConnectionArray = []; // List of neuron ids that can pass be viable targets for synapse links
     }
 
-    // Rebuild the I/O connections whilst also taking on any input
-    setConnections(){
-        // Temporarily manually add speed and turn outputs to brain TODO: remove when there are movement parts
-        this.outputs = [0, 0];
+    fire(){     
 
-        // Check all parts and prep input and output count
-        for(var i = 0; i < this.creature.parts.length; i++){
-            let part = this.creature.parts[i];
-            if(part.outputs){
-                part.sense(); // Take sensory input (at least for getting the right input count)
-                for(var j = 0; j < part.outputs.length; j++){ 
-                    this.inputs.push(part.outputs[j]);
-                }   
-            }else if(part.inputs){
-                for(var j = 0; j < part.inputs.length; j++){
-                    this.outputs.push(0);
-                }
-            }                 
-        }
-    }
-
-    fire(){
-        this.setConnections();
-
-        let inputCount = this.inputs.length;
-        let outputCount = this.outputs.length;
-        let totalNeurons = inputCount + this.hiddenNeuronCount + outputCount;
-
-        let biasCount = 5;
-        let biasZeroCount = 1;
-
-        // TODO: put this in unit test
-        if(biasZeroCount >= biasCount) console.warn('Zero Biases are greater than One Biases, there will be no bias system')
-
-        // Assign input senses to firstnuerons in list (artificially chosen as "input" neurons)
-        for(let i=inputCount+biasCount;i<totalNeurons;i++){
-            this.neurons[i].activity = 0;
-        }
-
-        for(let i = 0; i < this.inputs.length; i++){
-            this.neurons[i].activity = this.inputs[i];
-        }
-
-        for(let i = biasZeroCount; i < biasCount; i++){
-            // Give some extra neurons some bias of 1 or 0 
-            this.neurons[inputCount+i].activity = 1;
-        }
-
-        for(let i=inputCount+5;i<totalNeurons;i++){
-            let neuron = this.neurons[i];           
+        for(var id in this.neurons){
+            let neuron = this.neurons[id];
             let a = 0; //Activation value
-            // Check all the synapse links on this neuron
+
             for(let j=0;j<neuron.synapses.length;j++){
                 let synapse = neuron.synapses[j];
                 // add up all their weighted values (link weight with target neuron activity)
                 a += synapse.weight*this.neurons[synapse.link].activity;
-            }       
-
-            // Sigmoid normalise and set as neuron activation value
-            neuron.activity = (i < totalNeurons - outputCount - 1) ? 1.0/(1.0 + Math.exp(-a)) : a;   
+            }  
+            
+            if(neuron.type === NEURON_TYPES.OUTPUT){
+                neuron.activity = a - a/2; // Allow negative activity for output neurons
+            }else{
+                neuron.activity = 1.0/(1.0 + Math.exp(-a)); // Sigmoid normalise and set as neuron activation value
+            }
         }
-
-        // Artificially treat the final neurons as the output
-        let outputs = this.neurons.slice(Math.max(totalNeurons - outputCount, 1));
-
-        for(var i = 0; i < outputs.length; i++){        
-            this.outputs[i] = outputs[i].activity - outputs[i].activity/2;     
-        }
-        
-        return this.outputs;
     }
 
-    buildDefault(){  
-        this.setConnections();
+    buildDefault(){         
+        // Temporarily manually add speed and turn outputs to brain TODO: remove when there are movement parts       
+        this.creature.turnConnector.neuronId = this.createNeurons(NEURON_TYPES.OUTPUT);
+        this.creature.speedConnector.neuronId = this.createNeurons(NEURON_TYPES.OUTPUT);
 
-        let inputCount = this.inputs.length;
-        let outputCount = this.outputs.length;
-        let totalNeurons = inputCount + this.hiddenNeuronCount + outputCount;
 
-        let linkIndex;
-        // Build default neural network
-        for(var i=0; i<totalNeurons; i++){
-            let synapses = [];
-            for(var j=0; j<this.synapseCount; j++){
-                //Generate random synapse links with random weights but dont link inputs to each other, or outputs to eachother
-                if(i < inputCount){ // Input neuron
-                    linkIndex = randomInt(inputCount, totalNeurons - 1)
-                }else if(i > totalNeurons - outputCount - 1){ //Output neuron
-                    linkIndex = randomInt(0, totalNeurons - outputCount - 1)
-                }else{
-                    linkIndex = randomInt(0, totalNeurons - 1)
-                }
-                // linkIndex = randomInt(0, totalNeurons - 1)
-                synapses.push({
-                    weight: randomFloat(-1.5, 1.5),
-                    link: linkIndex
-                }); 
+        // Check all parts and prep input and output neurons
+        for(var i = 0; i < this.creature.parts.length; i++){
+            let part = this.creature.parts[i];
+            if(part.outputs){
+                for(var j in part.outputs){
+                    part.outputs[j].neuronId = this.createNeurons(NEURON_TYPES.INPUT);
+                }   
+            }else if(part.inputs){
+                for(var j in part.inputs)  {
+                    part.inputs[j].neuronId = this.createNeurons(NEURON_TYPES.OUTPUT);
+                }                          
+            }                 
+        }
+
+        // Create bias neurons
+        this.createNeurons(NEURON_TYPES.BIAS, 5);  
+
+        // Create hidden neurons
+        this.createNeurons(NEURON_TYPES.HIDDEN, this.hiddenNeuronCount);  
+
+        // Create connections for different types of neurons  
+        for(var id in this.neurons){
+            let neuron = this.neurons[id];
+            switch(neuron.type){
+                case NEURON_TYPES.INPUT:
+                    neuron.synapses = [] // Inputs get their activity value from sense parts, not from synaptic links
+                    break;
+                case NEURON_TYPES.BIAS:
+                    neuron.synapses = [] // Biases have static activity, no need to have receptive links (though other neurons could link from them)
+                    break;
+                case NEURON_TYPES.HIDDEN:
+                    neuron.synapses = this.createSynapses();
+                    break;
+                case NEURON_TYPES.OUTPUT:
+                    neuron.synapses = this.createSynapses();
+                    break;
             }
-    
-            this.neurons[i] = {
-                activity: 0,
-                synapses: synapses
-            };
-        }  
-        
+        }        
     }
 
     inherit(brain){
-        this.setConnections();
 
-        let inputCount = this.inputs.length;
-        let outputCount = this.outputs.length;
-        let totalNeurons = inputCount + this.hiddenNeuronCount + outputCount;
+        this.neurons = JSON.parse(JSON.stringify(brain.neurons))
+        this.viableConnectionArray = brain.viableConnectionArray;
 
-        for (var i=0;i<totalNeurons;i++) {
-            this.neurons[i] = {
-                activity: 0,
-                synapses: JSON.parse(JSON.stringify(brain.neurons[i].synapses))
-            }
-            for (var j=0;j<this.synapseCount;j++) {
-                
-                //Randomly adjust link weights
-                if(Math.random() < brainMutationChance){
-                    let weightChange = randomFloat(0,brainMutationFactor*2) - brainMutationFactor;
-                    this.neurons[i].synapses[j].weight += weightChange;
-                }
-                
-                //Randomly adjust synapse links
-                if(Math.random() < brainMutationChance){
-                    let linkIndex;
-    
-                    if(i < inputCount){ // Input neuron
-                        linkIndex = randomInt(inputCount, totalNeurons - 1)
-                    }else if(i > totalNeurons - outputCount - 1){ //Output neuron
-                        linkIndex = randomInt(0, totalNeurons - outputCount - 1)
-                    }else{
-                        linkIndex = randomInt(0, totalNeurons - 1)
+        // Create neurons and links for new inputs/outputs 
+        for(var i = 0; i < this.newParts; i++){
+            let part = this.newParts[i];
+            if(part.outputs){
+                for(var j in part.outputs){
+                    part.outputs[j].neuronId = this.createNeurons(NEURON_TYPES.INPUT);
+                }   
+            }else if(part.inputs){
+                for(var j in part.inputs)  {
+                    part.inputs[j].neuronId = this.createNeurons(NEURON_TYPES.OUTPUT);
+                }                          
+            } 
+        }
+
+        this.newParts = null; // Remove link to new parts - unneeded
+
+        // Generate new syapses for new parts or mutate old parts
+        for(var id in this.neurons){
+            let neuron = this.neurons[id];
+            neuron.activity = 0; //Reset activity - dont want to inherit parent's current action
+          
+            if(neuron.type === NEURON_TYPES.HIDDEN || neuron.type === NEURON_TYPES.OUTPUT){
+                if(!neuron.synapses.length){ // New neuron from newly generated parts
+                    neuron.synapses = this.createSynapses();
+                }else{
+                    // Mutation possibility for old neurons
+                    for (var j=0;j<neuron.synapses.length;j++) {
+                        //Randomly adjust link weights
+                        if(Math.random() < brainMutationChance){
+                            let weightChange = randomFloat(0,brainMutationFactor*2) - brainMutationFactor;
+                            neuron.synapses[j].weight += weightChange;
+                        }
+
+                        //Randomly adjust synapse links TODO: if a link has a null target, give it a new one (or maybe ignore it)
+                        if(Math.random() < brainMutationChance){                        
+                            neuron.synapses[j].link = this.randomSynapse()                           
+                        }
                     }
-       
-                    this.neurons[i].synapses[j].link = linkIndex;
                 }
-                
             }
         }
+    }
+
+    createNeurons(type, quantity = 1){ 
+        for(var i = 0; i < quantity; i++){
+            let _N = new Neuron(type);            
+            this.neurons[_N.id] = _N;  
+
+            switch(type){
+                case NEURON_TYPES.INPUT:
+                    this.viableConnectionArray.push(_N.id);
+                    break;
+                case NEURON_TYPES.BIAS:
+                    _N.activity = Math.round(Math.random()); //Random static activity of 1 or 0;
+                    this.viableConnectionArray.push(_N.id); 
+                    break;
+                case NEURON_TYPES.HIDDEN:
+                    this.viableConnectionArray.push(_N.id);
+                    break;
+                case NEURON_TYPES.OUTPUT:
+                    break;
+            }
+
+            if(quantity === 1) return _N.id;
+        }
+    }
+
+    createSynapses(quantity = this.synapseCount){
+        let synapses = [];
+
+        for(let i = 0; i < quantity; i++){
+            synapses.push({
+                weight: randomFloat(-1.5, 1.5),
+                link: this.randomSynapse()
+            });
+        }        
+
+        return synapses;
+    }
+
+    randomSynapse(){
+        let nArray = this.viableConnectionArray;
+        return nArray[Math.floor(Math.random()*nArray.length)]
     }
 }

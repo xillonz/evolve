@@ -1,5 +1,5 @@
 class Absorber extends Part{
-    static mutationChance() { return 0.5; }
+    static mutationChance() { return 1; }
     static limit(){ return 1; } // Limit of number of parts of type on creature
 
     constructor(creature){
