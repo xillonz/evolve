@@ -12,7 +12,7 @@ const minCreatures = 5;
 // ----------------------------------------------------------------------
 
 var App = {
-    paused: true,
+    paused: false,
     updateFPS: 60,
     init: function(){ 
         this.buildWorld(12, 30);
@@ -28,6 +28,7 @@ var App = {
             switch(event.code){
                 case 'Pause':
                     if(App.paused){
+                        App.paused = false;
                         App.startUpdate();
                         App.draw();
                     }else{
@@ -146,12 +147,11 @@ var App = {
         
         Life.update();
 
-        updating = setTimeout(App.update, 1000/App.updateFPS);        
+        if(!App.paused) updating = setTimeout(App.update, 1000/App.updateFPS);        
     },
 
     // Draw canvas
-    draw: function(){
-        App.paused = false; 
+    draw: function(){        
 
         App.clear();
 

@@ -112,7 +112,7 @@ class Creature{
     genesis(parent){
         // Inherit traits
         let traits = parent.traits;
-        let mutatedTraits = JSON.parse(JSON.stringify(traits));
+        let mutatedTraits = copyObject(traits);
 
         for(var i = 0; i < inheritable.length; i++){
             if(Math.random() < mutationChance){
@@ -137,8 +137,7 @@ class Creature{
         // TODO: when parts can dissapear, keep track here of which parts have been removed, and update the brain to remove associated neurons/links
 
         // Inherit the parent's brain
-        this.brain.inherit(parent.brain);
-               
+        this.brain.inherit(parent.brain);               
         
         // TODO: Remove when movement parts are created
         this.turnConnector.neuronId = parent.turnConnector.neuronId;
@@ -154,12 +153,11 @@ class Creature{
     checkAbnormalities(abnormalityBonus){        
         // Randomly aquire new parts
         for(var i in Life.partClasses){
-            let C = Life.partClasses[i];
-            if(countClass(this.parts, C) >= C.limit()) continue;
-            if(Math.random() < C.mutationChance() + abnormalityBonus){
-                var newPart = new C(this);
+            let P = Life.partClasses[i];
+            if(countClass(this.parts, P) >= P.limit()) continue;
+            if(Math.random() < P.mutationChance() + abnormalityBonus){
+                var newPart = new P(this);
                 this.parts.push(newPart);
-                this.brain.newParts.push(newPart);
             }
         }    
     }

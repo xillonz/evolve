@@ -79,7 +79,7 @@ class Ear extends Sensor{
 
     inheritFeatures(ear){
         this.distance = mutate(ear.distance, 0, 1);
-        this.angle = mutateAngle(ear.distance);
+        this.angle = mutateAngle(ear.angle);
         this.hearingRadius = mutate(ear.hearingRadius, 0);
     }
 }

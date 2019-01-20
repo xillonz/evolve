@@ -23,15 +23,10 @@ class Neuron{
 class Brain{   
     constructor(creature){
         this.creature = creature;
-        this.latestNeuronId = 0;
     
         this.hiddenNeuronCount = hiddenNeuronCount;
         this.synapseCount = synapseCount;      
         this.neurons = {};
-
-        // Store changes compared to previous parent during inheritance in order to rewire the brain appropriately
-        this.newParts = []; 
-        this.removedParts = [];
 
         this.viableConnectionArray = []; // List of neuron ids that can pass be viable targets for synapse links
     }
@@ -103,25 +98,24 @@ class Brain{
     }
 
     inherit(brain){
-
-        this.neurons = JSON.parse(JSON.stringify(brain.neurons))
-        this.viableConnectionArray = brain.viableConnectionArray;
+        this.neurons = copyObject(brain.neurons);
+        this.viableConnectionArray = brain.viableConnectionArray.slice();
 
         // Create neurons and links for new inputs/outputs 
-        for(var i = 0; i < this.newParts; i++){
-            let part = this.newParts[i];
-            if(part.outputs){
-                for(var j in part.outputs){
-                    part.outputs[j].neuronId = this.createNeurons(NEURON_TYPES.INPUT);
-                }   
-            }else if(part.inputs){
-                for(var j in part.inputs)  {
-                    part.inputs[j].neuronId = this.createNeurons(NEURON_TYPES.OUTPUT);
-                }                          
-            } 
+        for(var i = 0; i < this.creature.parts.length; i++){
+            let part = this.creature.parts[i];
+            if(!part.inherited){
+                if(part.outputs){
+                    for(var j in part.outputs){
+                        part.outputs[j].neuronId = this.createNeurons(NEURON_TYPES.INPUT);
+                    }   
+                }else if(part.inputs){
+                    for(var j in part.inputs)  {
+                        part.inputs[j].neuronId = this.createNeurons(NEURON_TYPES.OUTPUT);
+                    }                          
+                } 
+            }            
         }
-
-        this.newParts = null; // Remove link to new parts - unneeded
 
         // Generate new syapses for new parts or mutate old parts
         for(var id in this.neurons){

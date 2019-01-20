@@ -4,13 +4,27 @@ var Life = {
 
     update: function (){
         for(var id in this.creatures){
-            this.updateCreature(this.creatures[id])
+            try {
+                this.updateCreature(this.creatures[id])
+            }
+            catch(err) {
+                console.error(err);
+                console.log(this.creatures[id])
+                App.pause();
+            }            
         }
     },
 
     draw: function(){
-        for(var id in this.creatures){
-            this.drawCreature(this.creatures[id])
+        for(var id in this.creatures){            
+            try {
+                this.drawCreature(this.creatures[id])
+            }
+            catch(err) {
+                console.error(err);
+                console.log(this.creatures[id])
+                App.pause();
+            }   
         }
     },
 

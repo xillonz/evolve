@@ -2,7 +2,7 @@
 class PartConnection {
     constructor(){
         this.neuronId = null;
-        this.value = 0;
+        this.value = 0;        
     }
 }
 
@@ -15,6 +15,7 @@ class Part{
         this.creature = creature;
         this.locatable = true;  
         this.isSensor = false;
+        this.inherited = false;
 
         this.colour = {
             r: 0,
@@ -31,6 +32,7 @@ class Part{
     inherit(part){
         this.inputs = JSON.parse(JSON.stringify(part.inputs));
         this.inheritFeatures(part); // Inherit features specific to that part
+        this.inherited = true;
     }
 
     inheritFeatures() {}

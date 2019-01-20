@@ -9,6 +9,7 @@ class Sensor extends Part{
         this.inputs = JSON.parse(JSON.stringify(part.inputs));
         this.outputs = JSON.parse(JSON.stringify(part.outputs));
         this.inheritFeatures(part); // Inherit features specific to that part
+        this.inherited = true;
     }
 
     sense(){

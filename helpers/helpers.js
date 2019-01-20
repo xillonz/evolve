@@ -82,3 +82,8 @@ function getMousePos(canvas, e) {
       y: e.clientY - rect.top
     };
 }
+
+// Copy object - can't copy methods
+function copyObject(target){
+    return JSON.parse(JSON.stringify(target));
+}
