@@ -138,6 +138,11 @@ class Creature{
 
         // Inherit the parent's brain
         this.brain.inherit(parent.brain);
+               
+        
+        // TODO: Remove when movement parts are created
+        this.turnConnector.neuronId = parent.turnConnector.neuronId;
+        this.speedConnector.neuronId = parent.speedConnector.neuronId;
 
         // Update child stats
         this.parentId = parent.id; 
@@ -146,7 +151,6 @@ class Creature{
         this.y = parent.y+parent.radius*2;
     }
 
-    // TODO: When adding new parts, somehow insert them into the neuron mapping whilst retaining the parents synapses for the old parts
     checkAbnormalities(abnormalityBonus){        
         // Randomly aquire new parts
         for(var i in Life.partClasses){

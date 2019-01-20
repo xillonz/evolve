@@ -56,10 +56,4 @@ class Nerves extends Sensor{
         result = (count) ? creatureInput/count : 0;
         this.outputs.creatures.value = result;           
     }
-
-    inherit(ear){
-        this.distance = mutate(ear.distance, 0, 1);
-        this.angle = mutateAngle(ear.distance);
-        this.hearingRadius = mutate(ear.hearingRadius, 0);
-    }
 }

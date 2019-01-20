@@ -9,7 +9,7 @@ class Absorber extends Part{
         this.absorptionRate = 1.3; // energy / tick
     }   
 
-    inherit(absorber){
+    inheritFeatures(absorber){
         // this.absorbtionRadius = mutate(absorber.absorbtionRadius)
     }
 

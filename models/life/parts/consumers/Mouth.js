@@ -18,7 +18,7 @@ class Mouth extends Part{
         };
     }   
 
-    inherit(mouth){
+    inheritFeatures(mouth){
         this.radius = mutate(mouth.radius);
         // this.distance = mutate(mouth.distance);
         this.angle = mutateAngle(mouth.angle);

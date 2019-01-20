@@ -28,7 +28,12 @@ class Part{
         this.inputs = {};
     }
 
-    inherit(){}
+    inherit(part){
+        this.inputs = JSON.parse(JSON.stringify(part.inputs));
+        this.inheritFeatures(part); // Inherit features specific to that part
+    }
+
+    inheritFeatures() {}
 
     // Act on brain output TODO: update to
     behave(){
