@@ -91,7 +91,7 @@ class Creature{
 
         // Creature ID
         latestCreatureId += 1;
-        this.id = latestCreatureId;
+        this.id = latestCreatureId.toString();
 
         Life.creatures[this.id] = this;
 
@@ -197,9 +197,9 @@ class Creature{
 
     grow(){
         this.age += 1
-        let scaleFactor = (this.age >= this.reproducer.maturityAge) ? 1 : this.age/this.reproducer.maturityAge; 
-        if(scaleFactor < 0.5) scaleFactor = 0.5;
-        this.radius = this.baseSize*scaleFactor;
+        this.scaleFactor = (this.age >= this.reproducer.maturityAge) ? 1 : this.age/this.reproducer.maturityAge; 
+        if(this.scaleFactor < 0.5) this.scaleFactor = 0.5;
+        this.radius = this.baseSize*this.scaleFactor;
     }
 
     die(){

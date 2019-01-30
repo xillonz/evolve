@@ -6,7 +6,7 @@ var ctx = canvas.getContext('2d');
 var drawing, updating;
 
 const maxCreatures = 30;
-const minCreatures = 5;
+const minCreatures = 8;
 
 
 // ----------------------------------------------------------------------
