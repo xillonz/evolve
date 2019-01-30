@@ -5,13 +5,6 @@ class Sensor extends Part{
         this.outputs = {};
     }
 
-    inherit(part){
-        this.inputs = JSON.parse(JSON.stringify(part.inputs));
-        this.outputs = JSON.parse(JSON.stringify(part.outputs));
-        this.inheritFeatures(part); // Inherit features specific to that part
-        this.inherited = true;
-    }
-
     sense(){
         // Take stimuli from world - required function of all Sensor parts.
         this.receiveStimuli();

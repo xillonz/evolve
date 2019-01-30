@@ -1,6 +1,6 @@
 // --- Toxin Constants ---
 var latestToxinId = 0;
-const toxinSpawnChance = 0.01; // Chance of spawning toxin every tick
+const toxinSpawnChance = 0.00001; // Chance of spawning toxin every tick
 const minToxicity = 1;
 const maxToxicity = 4;
 

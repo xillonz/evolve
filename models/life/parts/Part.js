@@ -1,8 +1,12 @@
 // Constructor for attaching parts to brain neurons
 class PartConnection {
-    constructor(){
-        this.neuronId = null;
+    constructor(neuronId = null){
+        this.neuronId = neuronId;
         this.value = 0;        
+    }
+
+    getBinary(){
+        return !!Math.round(this.value);
     }
 }
 
@@ -27,10 +31,18 @@ class Part{
         this.y = 0;
 
         this.inputs = {};
+        this.outputs = {};
     }
 
     inherit(part){
-        this.inputs = JSON.parse(JSON.stringify(part.inputs));
+        for(var key in part.outputs){
+            this.outputs[key] = new PartConnection(part.outputs[key].neuronId)
+        }
+
+        for(var key in part.inputs){
+            this.inputs[key] = new PartConnection(part.inputs[key].neuronId)
+        }
+        
         this.inheritFeatures(part); // Inherit features specific to that part
         this.inherited = true;
     }

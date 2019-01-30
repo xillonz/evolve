@@ -47,6 +47,9 @@ function vector(a, m, x, y){
         y = Math.sin(a)*m;
     }
 
+    if(x === -0) x = 0;
+    if(y === -0) y = 0;
+    
     return {
         x: x, //x length
         y: y, //y length
@@ -86,4 +89,8 @@ function getMousePos(canvas, e) {
 // Copy object - can't copy methods
 function copyObject(target){
     return JSON.parse(JSON.stringify(target));
+}
+
+function oLength(object){
+    return Object.keys(object).length
 }

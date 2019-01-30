@@ -6,7 +6,7 @@ const baseGenome = {
     energyBase: 1000    
 };
 const inheritable = ['speed', 'turn']; // inheritable traits that dont belong to a part
-const energyDrainFactor = 0.001; // Factor by how much energy is drained per draw
+const energyDrainFactor = 0.0002; // Factor by how much energy is drained per draw
 const energyDrainConstant = 1; // Background energy drain (if the creature was sitting still)
 
 const mutationChance = 0.2; // Chance of a mutation occurring upon breeding

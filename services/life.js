@@ -4,25 +4,33 @@ var Life = {
 
     update: function (){
         for(var id in this.creatures){
+            let c = this.creatures[id];  
             try {
-                this.updateCreature(this.creatures[id])
+                this.updateCreature(c)
             }
             catch(err) {
                 console.error(err);
-                console.log(this.creatures[id])
+                console.log(c)
+                let p = Life.creatures[c.parentId];                
+                this.highlightCreature(c); 
+                this.highlightCreature(p); 
                 App.pause();
             }            
         }
     },
 
     draw: function(){
-        for(var id in this.creatures){            
+        for(var id in this.creatures){   
+            let c = this.creatures[id];         
             try {
-                this.drawCreature(this.creatures[id])
+                this.drawCreature(c)
             }
-            catch(err) {
+            catch(err) {                
                 console.error(err);
-                console.log(this.creatures[id])
+                console.log(c)                
+                let p = Life.creatures[c.parentId];
+                this.highlightCreature(c); 
+                this.highlightCreature(p); 
                 App.pause();
             }   
         }
@@ -37,7 +45,7 @@ var Life = {
         // Sense
         for(var i = 0; i < c.parts.length; i++){
             let part = c.parts[i];
-            if(part.outputs){
+            if(part.isSensor){
                 part.sense();
             }
         }
@@ -101,10 +109,7 @@ var Life = {
      */        
     drawCreature: function(c){               
         if(c.selected){
-            ctx.fillStyle = 'red';
-            ctx.beginPath();
-            ctx.arc(c.x, c.y, c.radius+2, 0, 2 * Math.PI);
-            ctx.fill();  
+            this.highlightCreature(c); 
         }
         // ctx.drawImage(c.img, c.x, c.y, c.img.width*c.scaleFactor, c.img.height*c.scaleFactor); 
         // Draw body
@@ -146,5 +151,12 @@ var Life = {
         ctx.fillStyle = 'khaki';
         let barWidth = (c.energy >= c.reproducer.breedingEnergy) ? 2*c.radius : c.energy / c.reproducer.breedingEnergy * 2*c.radius;         
         ctx.fillRect(c.x-c.radius, c.y + c.radius + 4, barWidth, 4);            
+    },
+
+    highlightCreature: function(c){
+        ctx.fillStyle = 'red';
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, c.radius+2, 0, 2 * Math.PI);
+        ctx.fill(); 
     }
 }

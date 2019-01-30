@@ -16,6 +16,10 @@ class Mouth extends Part{
             g: 50,
             b: 50
         };
+
+        this.inputs = {
+            bite: new PartConnection()
+        }
     }   
 
     inheritFeatures(mouth){
@@ -23,23 +27,51 @@ class Mouth extends Part{
         // this.distance = mutate(mouth.distance);
         this.angle = mutateAngle(mouth.angle);
     }
-
-    // Bite
+    
     act(){
-        for(let id in Environment.nutrients){
-            let nutrient = Environment.nutrients[id];   
-            if(nutrient.size() <= this.radius && withinRadius(nutrient.x, nutrient.y, this.x, this.y, this.radius)){
-                this.creature.energy += nutrient.energy;
-                delete Environment.nutrients[nutrient.id];
+        // Bite
+        if(this.inputs.bite.getBinary()){
+            
+            for(let id in Environment.nutrients){
+                let nutrient = Environment.nutrients[id];   
+                if(nutrient.size() <= this.radius && withinRadius(nutrient.x, nutrient.y, this.x, this.y, this.radius)){
+                    this.creature.energy += nutrient.energy;
+                    delete Environment.nutrients[nutrient.id];
+                }
             }
-        }
+    
+            for(let id in Environment.toxins){
+                let toxin = Environment.toxins[id];   
+                if(toxin.toxicity <= this.radius && withinRadius(toxin.x, toxin.y, this.x, this.y, this.radius)){
+                    this.creature.energy -= toxin.toxicity/0.02; // Reduce energy by toxicity reduces by some creature resistance factor (to be updated)
+                    delete Environment.toxins[toxin.id];
+                }
+            }
 
-        for(let id in Environment.toxins){
-            let toxin = Environment.toxins[id];   
-            if(toxin.toxicity <= this.radius && withinRadius(toxin.x, toxin.y, this.x, this.y, this.radius)){
-                this.creature.energy -= toxin.toxicity/0.02; // Reduce energy by toxicity reduces by some creature resistance factor (to be updated)
-                delete Environment.toxins[toxin.id];
+            for(let id in Life.creatures){
+                if(id == this.creature.id) continue;
+                let creature = Life.creatures[id];
+                if(withinRadius(creature.x, creature.y, this.x, this.y, this.radius)){
+                    this.creature.energy += 50;   // Fixed energy stolen from other creatures, TODO: update when there is a more comprehensive system
+                    creature.energy -= 50;            
+                }            
             }
-        }
+
+
+
+            this.colour = {
+                r: 50,
+                g: 0,
+                b: 0
+            };
+
+            this.creature.energy -= 1; // Cost to biting
+        }else{
+            this.colour = {
+                r: 180,
+                g: 50,
+                b: 50
+            };
+        }       
     }
 }

@@ -33,8 +33,26 @@ class Brain{
 
     fire(){     
 
+        //Process hidden neurons first
         for(var id in this.neurons){
             let neuron = this.neurons[id];
+            if(neuron.type !== NEURON_TYPES.HIDDEN) continue; // Inputs and Bias activation values already set
+            let a = 0; //Activation value
+
+            for(let j=0;j<neuron.synapses.length;j++){
+                let synapse = neuron.synapses[j];
+                // add up all their weighted values (link weight with target neuron activity)
+                a += synapse.weight*this.neurons[synapse.link].activity;
+            }              
+   
+            neuron.activity = 1.0/(1.0 + Math.exp(-a)); // Sigmoid normalise and set as neuron activation value
+            
+        }
+
+        // Then process outputs
+        for(var id in this.neurons){
+            let neuron = this.neurons[id];
+            if(neuron.type !== NEURON_TYPES.OUTPUT) continue; // Inputs and Bias activation values already set
             let a = 0; //Activation value
 
             for(let j=0;j<neuron.synapses.length;j++){
@@ -43,11 +61,7 @@ class Brain{
                 a += synapse.weight*this.neurons[synapse.link].activity;
             }  
             
-            if(neuron.type === NEURON_TYPES.OUTPUT){
-                neuron.activity = a - a/2; // Allow negative activity for output neurons
-            }else{
-                neuron.activity = 1.0/(1.0 + Math.exp(-a)); // Sigmoid normalise and set as neuron activation value
-            }
+            neuron.activity = a - a/2; // Allow negative activity for output neurons TODO: give output value management to the parts            
         }
     }
 
@@ -60,11 +74,11 @@ class Brain{
         // Check all parts and prep input and output neurons
         for(var i = 0; i < this.creature.parts.length; i++){
             let part = this.creature.parts[i];
-            if(part.outputs){
+            if(oLength(part.outputs)){
                 for(var j in part.outputs){
                     part.outputs[j].neuronId = this.createNeurons(NEURON_TYPES.INPUT);
                 }   
-            }else if(part.inputs){
+            }else if(oLength(part.inputs)){
                 for(var j in part.inputs)  {
                     part.inputs[j].neuronId = this.createNeurons(NEURON_TYPES.OUTPUT);
                 }                          
@@ -105,11 +119,11 @@ class Brain{
         for(var i = 0; i < this.creature.parts.length; i++){
             let part = this.creature.parts[i];
             if(!part.inherited){
-                if(part.outputs){
+                if(oLength(part.outputs)){
                     for(var j in part.outputs){
                         part.outputs[j].neuronId = this.createNeurons(NEURON_TYPES.INPUT);
                     }   
-                }else if(part.inputs){
+                }else if(oLength(part.inputs)){
                     for(var j in part.inputs)  {
                         part.inputs[j].neuronId = this.createNeurons(NEURON_TYPES.OUTPUT);
                     }                          
@@ -161,7 +175,7 @@ class Brain{
                     this.viableConnectionArray.push(_N.id);
                     break;
                 case NEURON_TYPES.OUTPUT:
-                    break;
+                    break; //TODO: perhaps create a separate output object so looping through outputs last on firing is easier
             }
 
             if(quantity === 1) return _N.id;
