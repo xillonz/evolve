@@ -52,7 +52,7 @@ class Brain{
         // Then process outputs
         for(var id in this.neurons){
             let neuron = this.neurons[id];
-            if(neuron.type !== NEURON_TYPES.OUTPUT) continue; // Inputs and Bias activation values already set
+            if(neuron.type !== NEURON_TYPES.OUTPUT) continue; 
             let a = 0; //Activation value
 
             for(let j=0;j<neuron.synapses.length;j++){
@@ -112,7 +112,7 @@ class Brain{
     }
 
     inherit(brain){
-        this.neurons = copyObject(brain.neurons);
+        this.neurons = copyObject(brain.neurons);        
         this.viableConnectionArray = brain.viableConnectionArray.slice();
 
         // Create neurons and links for new inputs/outputs 
@@ -134,7 +134,7 @@ class Brain{
         // Generate new syapses for new parts or mutate old parts
         for(var id in this.neurons){
             let neuron = this.neurons[id];
-            neuron.activity = 0; //Reset activity - dont want to inherit parent's current action
+            if(neuron.type !== NEURON_TYPES.BIAS) neuron.activity = 0; //Reset activity - dont want to inherit parent's current action other than bias values
           
             if(neuron.type === NEURON_TYPES.HIDDEN || neuron.type === NEURON_TYPES.OUTPUT){
                 if(!neuron.synapses.length){ // New neuron from newly generated parts
