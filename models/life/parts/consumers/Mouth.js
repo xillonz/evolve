@@ -51,12 +51,11 @@ class Mouth extends Part{
             for(let id in Life.creatures){
                 if(id == this.creature.id) continue;
                 let creature = Life.creatures[id];
-                if(withinRadius(creature.x, creature.y, this.x, this.y, this.radius)){
+                if(withinRadius(creature.x, creature.y, this.x, this.y, creature.radius)){
                     this.creature.energy += 50;   // Fixed energy stolen from other creatures, TODO: update when there is a more comprehensive system
                     creature.energy -= 50;            
                 }            
             }
-
 
 
             this.colour = {

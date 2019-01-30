@@ -5,6 +5,7 @@ class Reproducer{
         this.creature = creature;
         this.breedingEnergy = 1001; // Required energy for breeding
         this.maturityAge = 500;
+        this.cooldown = 0;
     }
 
     inherit(reproducer){
@@ -13,9 +14,15 @@ class Reproducer{
     }
 
     reproduce(){   
+        if(this.cooldown > 0){
+            this.cooldown -= 1;
+            return;
+        }
+        
         if(this.creature.energy >= this.breedingEnergy && this.creature.age >= this.maturityAge){
             new Creature(this.creature);
             this.creature.energy *= 0.7; // Energy left after reproducing
+            this.cooldown = 100; // Cooldown period TODO: consider this being an inheritable property, bound by some rules
         }
     }
 

@@ -16,16 +16,20 @@ function distance(x1, y1, x2, y2, root){
 }
 
 function getAngleRad(x1,y1,x2,y2) {
+    if(x1 == x2 && y1 == y2 ) return 0;
+
     var angleRad = Math.atan((y1-y2)/(x1-x2));
 
-    return(angleRad);
+    return angleRad;
 }
 
-function getAngleDeg(ax,ay,bx,by) {
-    var angleRad = Math.atan((ay-by)/(ax-bx));
+function getAngleDeg(x1,y1,x2,y2) {
+    if(x1 == x2 && y1 == y2 ) return 0;
+
+    var angleRad = Math.atan((y1-y2)/(x1-x2));
     var angleDeg = angleRad * 180 / Math.PI;
 
-    return(angleDeg);
+    return angleDeg;
 }
 
 // Check if a location is within a rectangular area given top left corner pos and dimensions of rectangle
