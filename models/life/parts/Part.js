@@ -6,7 +6,15 @@ class PartConnection {
     }
 
     getBinary(){
-        return !!Math.round(this.value);
+        return !!Math.round(this.getSigmoid());
+    }
+
+    getSigmoid(){
+        return  1.0/(1.0 + Math.exp(-this.value));
+    }
+
+    getBounded(){
+        return 2*this.getSigmoid() - 1;
     }
 }
 
@@ -49,7 +57,7 @@ class Part{
 
     inheritFeatures() {}
 
-    // Act on brain output TODO: update to
+    // Act on brain output
     behave(){
         for(var i in this.inputs){
             let input = this.inputs[i];

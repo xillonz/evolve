@@ -1,12 +1,9 @@
 // --- Creature constants ---
 var latestCreatureId = 0;
 const baseGenome = {
-    speed: 1,
-    turn: 0.02,
-    energyBase: 1000    
+    energyBase: 2000    
 };
-const inheritable = ['speed', 'turn']; // inheritable traits that dont belong to a part
-const energyDrainFactor = 0.0002; // Factor by how much energy is drained per draw
+const inheritable = []; // inheritable traits that dont belong to a part
 const energyDrainConstant = 1; // Background energy drain (if the creature was sitting still)
 
 const mutationChance = 0.2; // Chance of a mutation occurring upon breeding
@@ -63,15 +60,11 @@ class Creature{
         this.reproducer = new Reproducer(this);    
         this.parts = [];
 
-        // Temp until movement parts are added TODO: remove when there are movement parts
-        this.turnConnector = new PartConnection();
-        this.speedConnector = new PartConnection();
-
         // Starting position
         this.x = randomInt(0, Environment.width);
         this.y = randomInt(0, Environment.height);
 
-        this.direction = randomVector(0, 360, this.traits.speed);
+        this.direction = randomVector(0, 360, 0); // Random orientation with no speed at spawn
 
         this.energy = this.traits.energyBase;
         this.age = 0;
@@ -137,11 +130,8 @@ class Creature{
         // TODO: when parts can dissapear, keep track here of which parts have been removed, and update the brain to remove associated neurons/links
 
         // Inherit the parent's brain
-        this.brain.inherit(parent.brain);               
+        this.brain.inherit(parent.brain);              
         
-        // TODO: Remove when movement parts are created
-        this.turnConnector.neuronId = parent.turnConnector.neuronId;
-        this.speedConnector.neuronId = parent.speedConnector.neuronId;
 
         // Update child stats
         this.parentId = parent.id; 
@@ -162,7 +152,7 @@ class Creature{
         }    
     }
 
-    move(turn, speed){
+    move(){
         // BOUNCE OFF WALL
         // let minAngle = null;
         // if(this.x + this.img.width > canvas.width) minAngle = 90; // hit right side
@@ -179,20 +169,16 @@ class Creature{
         //     this.direction = randomVector(minAngle, minAngle + 180, this.direction.m);
         // }
 
-        if(typeof turn != 'undefined'){           
-            this.direction = vector(this.direction.a+turn, speed);
-        }
-        
+                
         this.x += this.direction.x;    
         this.y += this.direction.y; 
+      
 
         // Teleport to otherside of map
         if(this.x<0) this.x = Environment.width;
         if(this.x>Environment.width) this.x= 0;
         if(this.y<0) this.y= Environment.height;
         if(this.y>Environment.height) this.y= 0;
-
-        this.energy -= energyDrainFactor*this.radius*this.direction.m*this.direction.m + energyDrainConstant; // Reduce creatures energy: D.m.v²+C
     }
 
     grow(){

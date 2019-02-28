@@ -49,11 +49,18 @@ class Nerves extends Sensor{
             let creature = Life.creatures[id];
             if(withinRadius(creature.x, creature.y, this.creature.x, this.creature.y, this.creature.radius+2)){  
                 count += 1;                
-                creatureInput += getAngleRad(creature.x, creature.y, this.creature.x, this.creature.y);                
+                creatureInput += getAngleRad(creature.x, creature.y, this.creature.x, this.creature.y);   
+                
+                if(isNaN(creatureInput)){
+                    console.log('foreign: ', creature)                    
+                    console.log('this: ', this.creature)
+                    App.pause();
+                    throw 'fuck'
+                }
             }            
         }
 
         result = (count) ? creatureInput/count : 0;
-        this.outputs.creatures.value = result;           
+        this.outputs.creatures.value = result;    
     }
 }

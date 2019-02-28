@@ -1,6 +1,6 @@
 // --- Brain/Neural Network constants ---
-const hiddenNeuronCount = 20;
-const synapseCount = 10;
+const hiddenNeuronCount = 5;
+const synapseCount = 3;
 const brainMutationChance = 0.1;
 const brainMutationFactor = 0.3;
 
@@ -61,15 +61,11 @@ class Brain{
                 a += synapse.weight*this.neurons[synapse.link].activity;
             }  
             
-            neuron.activity = a - a/2; // Allow negative activity for output neurons TODO: give output value management to the parts            
+            neuron.activity = a;          
         }
     }
 
-    buildDefault(){         
-        // Temporarily manually add speed and turn outputs to brain TODO: remove when there are movement parts       
-        this.creature.turnConnector.neuronId = this.createNeurons(NEURON_TYPES.OUTPUT);
-        this.creature.speedConnector.neuronId = this.createNeurons(NEURON_TYPES.OUTPUT);
-
+    buildDefault(){ 
 
         // Check all parts and prep input and output neurons
         for(var i = 0; i < this.creature.parts.length; i++){

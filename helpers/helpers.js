@@ -43,8 +43,7 @@ function withinRadius(x1, y1, x2, y2, radius) {
 }
 
 function vector(a, m, x, y){
-    if(a>2*Math.PI) a = a-2*Math.PI;
-    if(a<0) a = 2*Math.PI+a;
+    a %= 2*Math.PI; // Constrain with 0 and 2pi
 
     if(arguments.length === 2){
         x = Math.cos(a)*m;
@@ -58,7 +57,7 @@ function vector(a, m, x, y){
         x: x, //x length
         y: y, //y length
         a: a, //angle
-        m: m  //hypotenuse
+        m: m  //hypotenuse - vector magnitude
     }
 }
 

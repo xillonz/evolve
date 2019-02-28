@@ -1,6 +1,6 @@
 var Life = {
     creatures: {},
-    partClasses: { Mouth, Ear, Absorber, Nerves }, // Parts creatures have access to
+    partClasses: { Mouth, Ear, Absorber, Nerves, Tail }, // Parts creatures have access to
 
     update: function (){
         for(var id in this.creatures){
@@ -37,11 +37,6 @@ var Life = {
     },
 
     updateCreature: function(c){
-        if(c.energy <= 0){
-            c.die();
-            return;
-        }
-    
         // Sense
         for(var i = 0; i < c.parts.length; i++){
             let part = c.parts[i];
@@ -51,20 +46,8 @@ var Life = {
         }
 
         // Yaaargh! Fire the synapses
-        c.brain.fire();
-        let targetTurn = c.brain.neurons[c.turnConnector.neuronId].activity;
-        let targetSpeed = c.brain.neurons[c.speedConnector.neuronId].activity;        
-    
-        // Limit the brain's demands with physical limitations TODO: should be inside the part classes (when exists)        
-        let turn = (targetTurn > c.traits.turn) ? c.traits.turn : targetTurn;
-        if(turn < -c.traits.turn) turn = -c.traits.turn;    
+        c.brain.fire();  
 
-        let speed = (c.direction.m+targetSpeed > c.traits.speed) ? c.traits.speed : c.direction.m+targetSpeed;
-        if(speed < 0) speed = 0;  
-    
-        // Carry out the orders 
-        c.move(turn, speed); 
-        c.grow(); 
     
         for(var i = 0; i < c.parts.length; i++){
             let part = c.parts[i];
@@ -76,6 +59,7 @@ var Life = {
             // Act upon the world if capable
             part.behave();             
         }
+        
     
         // Attempt to reproduce if creature limit is not hit
         if(Object.keys(this.creatures).length < maxCreatures){
@@ -101,6 +85,16 @@ var Life = {
                 c.x-= (c2.x-c.x)*ff1;
                 c.y-= (c2.x-c.x)*ff1;
             }
+        }
+
+        // Update state for next frame
+        c.move(); 
+        c.grow(); 
+
+        c.energy -= energyDrainConstant; // Constant energy drain for being alive
+
+        if(c.energy <= 0){
+            c.die();
         }
     },
     

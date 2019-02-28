@@ -1,12 +1,12 @@
 // --- Game constants ---
 var canvas = document.getElementById('world');
-canvas.width  = 900;
-canvas.height = 600;
+canvas.width  = 1200;
+canvas.height = 900;
 var ctx = canvas.getContext('2d');  
 var drawing, updating;
 
-const maxCreatures = 30;
-const minCreatures = 8;
+const maxCreatures = 100;
+const minCreatures = 30;
 
 
 // ----------------------------------------------------------------------
@@ -15,7 +15,7 @@ var App = {
     paused: false,
     updateFPS: 60,
     init: function(){ 
-        this.buildWorld(12, 30);
+        this.buildWorld(30, 320);
         buildStatsUI(); // TODO: change after stats organised 
         this.bind();
         this.startUpdate();
@@ -101,6 +101,7 @@ var App = {
 
         // Zoom
         canvas.onwheel = function(e){
+            e.preventDefault();
             var mousePos = getMousePos(canvas, e);
 
             ctx.translate(mousePos.x, mousePos.y);
@@ -186,6 +187,7 @@ var App = {
         clearTimeout(updating);
         App.updateFPS += change;
         if(App.updateFPS < 10) App.updateFPS = 10;
+        if(App.updateFPS > 250) App.updateFPS = 250;
         this.startUpdate();
     }
 }

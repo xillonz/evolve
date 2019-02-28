@@ -2,8 +2,8 @@ const maxNutrients = 500;
 const maxToxins = 200;
 
 var Environment = {
-    width: 1200,
-    height: 900,
+    width: 4000,
+    height: 2600,
     nutrients: {},
     toxins: {},
 
