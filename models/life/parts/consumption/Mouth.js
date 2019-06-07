@@ -5,8 +5,8 @@ class Mouth extends Part{
     constructor(creature){
         super(creature);
 
-        this.radius = 4;
-        this.distance = 1.2; // Distance from center in units of creature size
+        this.radius = 8;
+        this.distance = 1.3; // Distance from center in units of creature size
         this.angle = randomFloat(0, 2*Math.PI); // Angle from front of creature
         this.x = 0;
         this.y = 0;
