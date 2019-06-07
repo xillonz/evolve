@@ -1,7 +1,7 @@
 // --- Creature constants ---
 var latestCreatureId = 0;
 const baseGenome = {
-    energyBase: 2000    
+    energyBase: 4000    
 };
 const inheritable = []; // inheritable traits that dont belong to a part
 const energyDrainConstant = 1; // Background energy drain (if the creature was sitting still)
@@ -57,7 +57,7 @@ class Creature{
         //Base property values for creatures
         this.traits = baseGenome; 
         this.brain = new Brain(this);    
-        this.reproducer = new Reproducer(this);    
+        this.reproducer = new Reproducer(this);   
         this.parts = [];
 
         // Starting position
