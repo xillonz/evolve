@@ -6,47 +6,53 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <title>Evolve</title>
-    <style>
-        #container{
-            text-align: center;
-        }
-
-        #world{
-            border: solid 1px #bbb;
-        }
-
-        #creature-info{
-            text-align: left;
-            font-family: 'Arial';
-        }
-    </style>
+    <link rel="stylesheet" href="assets/main.css">
 </head>
 <body>
     <div id="container">
+        <header>
+            <h1>Evolve</h1>
+            <a href="#about">About</a>
+        </header>
+        
         <canvas id="world">
             Your browser does not support canvas. Please try again with a different browser.
         </canvas>
-        <div>
-            <strong>FPS:</strong>
-            <div id="fps"></div>
-        </div>
-        
-        <div id="creature-info">
-            <h2>Info</h2>
-            <strong>Generation:</strong>
-            <div id="generation"></div>        
-            <strong>Age:</strong>
-            <div id="age"></div>
-            <strong>Current Speed:</strong>
-            <div id="current-speed"></div>
-            <div id="inheritable-info"></div>
-
-            <hr>
+        <div id="info">
+            <div>
+                <strong>FPS:</strong>
+                <div id="fps"></div>
+            </div>
             
-            <strong>Creature Count</strong>
-            <div id="total-creatures"></div>
-            <div id="inheritable-average"></div>
-        </div>
+            <div id="creature-info">
+                <h2>Info</h2>
+                <strong>Generation:</strong>
+                <div id="generation"></div>        
+                <strong>Age:</strong>
+                <div id="age"></div>
+                <strong>Current Speed:</strong>
+                <div id="current-speed"></div>
+                <div id="inheritable-info"></div>
+    
+                <hr>
+                
+                <strong>Creature Count</strong>
+                <div id="total-creatures"></div>
+                <div id="inheritable-average"></div>
+            </div>
+    
+            <div id="about">
+                A simulation of basic evolutionary processes using Javascript Canvas. Agents have survival and breeding requirements. On succesful breeding, a clone is produced with each agent property having a chance of mutating by a small amount. This creates an environment in which the more succesful agents can evolve to better suit the environment.
+    
+                All agent behavior is run through a neural network. Inputs are collected through sensory "organs", outputs are mapped to behavioral organs such as mouths for eating, or tails for locomotion. The neural network can also mutate between generations, allowing the agents to learn behavior to be more succesfull.
+                
+                The network is automatically extensible, allowing generations to grow or lose organs while maintaining previous generations learned behavior.
+                
+                The organ system follows a clear OOP approach, allowing easy creation of new mutatable organs with specialised behavior. The genetic algorithm that wraps the system naturally includes additional organ behavior. This makes it very easy to create complex creatures with complex behavior.
+                
+                All agents follow the same rules, evolved behavior such as predation, and fight/flight is all organic.
+            </div>
+        </div>        
     </div>    
     
     <script src="gpu.js"></script> <!-- GPU Processing -->

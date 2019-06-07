@@ -1,6 +1,6 @@
 const energyDrainFactor = 0.0002; // Factor by how much energy is drained per draw - could be tail efficiency somehow
 
-// TODO: make movement in direction of tail location relative to creature centre
+// TODO: make movement in direction of tail location relative to creature centre (maybe just set initial creature direction based on tail location?)
 
 class Tail extends Part{
     static mutationChance() { return 1; }

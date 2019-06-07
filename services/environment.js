@@ -13,7 +13,8 @@ var Environment = {
         this.spawnToxin();
     },
 
-    draw: function(){
+    draw: function(){        
+        this.drawBackground();
         this.drawEdges();
 
         for(var id in this.nutrients){
@@ -23,6 +24,11 @@ var Environment = {
         for(var id in this.toxins){
             this.drawToxin(this.toxins[id]);
         }        
+    },
+
+    drawBackground: function(){
+        ctx.fillStyle = "#FFF";
+        ctx.fillRect(0, 0, this.width, this.height);
     },
 
     drawEdges: function(){

@@ -59,7 +59,7 @@ class Mouth extends Part{
                     }            
                 }
 
-                this.creature.energy -= 5; // Cost to biting
+                this.creature.energy -= this.radius; // Cost to biting
             }
 
             this.open = false;
@@ -72,7 +72,7 @@ class Mouth extends Part{
         }else{ // Open mouth
 
             if(!this.open){
-                this.creature.energy -= 5; // Cost to opening mouth
+                this.creature.energy -= this.radius; // Cost to opening mouth
             }
 
             this.open = true;
