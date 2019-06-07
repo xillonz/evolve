@@ -9,6 +9,6 @@ All agent behavior is run through a neural network. Inputs are collected through
 
 The network is automatically extensible, allowing generations to grow or lose organs while maintaining previous generations learned behavior.
 
-The organ system follows a clear OOP approach, allowing easy creation of new mutatable organs with specialised behavior. The genetic algorithm that wraps the system naturally includes additional organ behavior. This makes it very easy to create complex creatures with complex bejavior. 
+The organ system follows a clear OOP approach, allowing easy creation of new mutatable organs with specialised behavior. The genetic algorithm that wraps the system naturally includes additional organ behavior. This makes it very easy to create complex creatures with complex behavior. 
 
 All agents follow the same rules, evolved behavior such as predation, and fight/flight is all organic. 
