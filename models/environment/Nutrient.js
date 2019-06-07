@@ -1,6 +1,6 @@
 // --- Nutrient Constants ---
 var latestNutrientId = 0;
-const nutrientSpawnChance = 0.1; // Chance of spawning nutrient every tick
+const nutrientSpawnChance = 0.3; // Chance of spawning nutrient every tick
 const minSize = 450;
 const maxSize = 650;
 

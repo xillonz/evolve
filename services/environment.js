@@ -1,4 +1,4 @@
-const maxNutrients = 500;
+const maxNutrients = 600;
 const maxToxins = 200;
 
 var Environment = {
