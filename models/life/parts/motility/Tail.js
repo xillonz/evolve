@@ -1,4 +1,4 @@
-const energyDrainFactor = 0.0002; // Factor by how much energy is drained per draw - could be tail efficiency somehow
+const energyDrainFactor = 0.0001; // Factor by how much energy is drained per draw - could be tail efficiency somehow
 
 // TODO: make movement in direction of tail location relative to creature centre (maybe just set initial creature direction based on tail location?)
 

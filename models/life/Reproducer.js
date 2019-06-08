@@ -3,7 +3,7 @@
 class Reproducer{   
     constructor(creature){
         this.creature = creature;
-        this.breedingEnergy = 4001; // Required energy for breeding
+        this.breedingEnergy = 3001; // Required energy for breeding
         this.maturityAge = 700;
         this.cooldown = 0;
     }

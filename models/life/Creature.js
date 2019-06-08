@@ -1,10 +1,10 @@
 // --- Creature constants ---
 var latestCreatureId = 0;
 const baseGenome = {
-    energyBase: 4000    
+    energyBase: 3000    
 };
 const inheritable = []; // inheritable traits that dont belong to a part
-const energyDrainConstant = 1; // Background energy drain (if the creature was sitting still)
+const energyDrainConstant = 0.5; // Background energy drain (if the creature was sitting still)
 
 const mutationChance = 0.2; // Chance of a mutation occurring upon breeding
 const mutationFactor = 0.1; // How large a change can occur within the mutation
