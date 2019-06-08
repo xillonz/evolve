@@ -5,7 +5,7 @@ class Mouth extends Part{
     constructor(creature){
         super(creature);
 
-        this.radius = 8;
+        this.radius = 4;
         this.distance = 1.3; // Distance from center in units of creature size
         this.angle = randomFloat(0, 2*Math.PI); // Angle from front of creature
         this.x = 0;
@@ -25,7 +25,8 @@ class Mouth extends Part{
     }   
 
     inheritFeatures(mouth){
-        this.radius = mutate(mouth.radius);
+        // this.radius = mutate(mouth.radius);
+        this.radius = mouth.radius;
         // this.distance = mutate(mouth.distance);
         this.angle = mutateAngle(mouth.angle);
     }
