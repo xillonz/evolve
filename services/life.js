@@ -142,7 +142,9 @@ var Life = {
         // ctx.fill(); 
     
         // Draw energy bar
-        ctx.fillStyle = 'khaki';
+        let breedingHealth = c.energy/c.reproducer.breedingEnergy * 255.0;
+        if(breedingHealth > 255) breedingHealth = 255;       
+        ctx.fillStyle = 'rgb('+(255-breedingHealth)+', '+breedingHealth+', 0)';
         let barWidth = (c.energy >= c.reproducer.breedingEnergy) ? 2*c.radius : c.energy / c.reproducer.breedingEnergy * 2*c.radius;         
         ctx.fillRect(c.x-c.radius, c.y + c.radius + 4, barWidth, 4);            
     },

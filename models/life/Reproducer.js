@@ -3,7 +3,7 @@
 class Reproducer{   
     constructor(creature){
         this.creature = creature;
-        this.breedingEnergy = 3001; // Required energy for breeding
+        this.breedingEnergy = 2000; // Required energy for breeding
         this.maturityAge = 700;
         this.cooldown = 0;
     }
@@ -13,7 +13,7 @@ class Reproducer{
         this.maturityAge = mutateAngle(reproducer.maturityAge);
     }
 
-    reproduce(){   
+    reproduce(){         
         if(this.cooldown > 0){
             this.cooldown -= 1;
             return;

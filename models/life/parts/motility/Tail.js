@@ -11,7 +11,7 @@ class Tail extends Part{
 
         this.radius = 4;
         this.distance = 1; // Distance from center in units of creature size
-        this.angle = randomFloat(0, 2*Math.PI); // Angle from front of creature
+        this.angle = Math.PI; // Angle from front of creature - static at the rear
         this.x = 0;
         this.y = 0;
 
@@ -28,6 +28,8 @@ class Tail extends Part{
             speed: new PartConnection(),
             turn: new PartConnection(),
         }
+
+        creature.motor = this;
     }   
 
     inheritFeatures(tail){

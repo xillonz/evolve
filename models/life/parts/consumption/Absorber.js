@@ -1,12 +1,12 @@
 class Absorber extends Part{
-    static mutationChance() { return 1; }
+    static mutationChance() { return 0.01; }
     static limit(){ return 1; } // Limit of number of parts of type on creature
 
     constructor(creature){
         super(creature);
         this.locatable = false;
         this.absorptionRadius = 1;
-        this.absorptionRate = 1.3; // energy / tick
+        this.absorptionRate = 2.5; // energy / tick
     }   
 
     inheritFeatures(absorber){

@@ -1,10 +1,10 @@
 // --- Creature constants ---
 var latestCreatureId = 0;
 const baseGenome = {
-    energyBase: 3000    
+    energyBase: 1500    
 };
 const inheritable = []; // inheritable traits that dont belong to a part
-const energyDrainConstant = 0.5; // Background energy drain (if the creature was sitting still)
+const energyDrainConstant = 1; // Background energy drain (if the creature was sitting still)
 
 const mutationChance = 0.2; // Chance of a mutation occurring upon breeding
 const mutationFactor = 0.1; // How large a change can occur within the mutation
@@ -94,10 +94,26 @@ class Creature{
         if(hasParent){
             this.genesis(parent); 
         }else{
+            // ---- TEMP create old creature ----
+            let mouth = new Mouth(this);
+            mouth.angle = 0;
+            this.parts.push(mouth);
+
+            let lEar = new Ear(this);
+            lEar.angle = -Math.PI/4
+            lEar.distance = 0.9
+            this.parts.push(lEar);
+
+            let rEar = new Ear(this);
+            rEar.angle = Math.PI/4
+            rEar.distance = 0.9
+            this.parts.push(rEar);
+            // ----------------------------------
+
             // If its generation 0, build the new creature with random parts and a default brain
             this.checkAbnormalities(0); // Acquire random parts only
             this.brain.buildDefault();
-        }      
+        }    
     }   
 
     // TODO: 

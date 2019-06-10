@@ -10,11 +10,14 @@ class Nerves extends Sensor{
             nutrients: new PartConnection(),
             toxins: new PartConnection(),
             creatures: new PartConnection(),
+            energy: new PartConnection()
         }
     }
 
     // TODO: update nerve sense calculations to handle direction
     receiveStimuli(){
+        this.outputs.energy.value = this.creature.energy; // Sense own energy level
+
         let count = 0;
         let nutrientInput = 0;
         for(let id in Environment.nutrients){

@@ -5,8 +5,8 @@ canvas.height = 900;
 var ctx = canvas.getContext('2d');  
 var drawing, updating;
 
-const maxCreatures = 200;
-const minCreatures = 80;
+var maxCreatures = 50;
+var minCreatures = 5;
 
 
 // ----------------------------------------------------------------------
@@ -15,7 +15,7 @@ var App = {
     paused: false,
     updateFPS: 60,
     init: function(){ 
-        this.buildWorld(80, 820);
+        this.buildWorld(15, 500);
         buildStatsUI(); // TODO: change after stats organised 
         this.bind();
         this.startUpdate();

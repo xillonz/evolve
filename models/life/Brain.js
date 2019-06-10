@@ -1,6 +1,6 @@
 // --- Brain/Neural Network constants ---
 const hiddenNeuronCount = 20;
-const synapseCount = 3;
+const synapseCount = 5;
 const brainMutationChance = 0.1;
 const brainMutationFactor = 0.3;
 
