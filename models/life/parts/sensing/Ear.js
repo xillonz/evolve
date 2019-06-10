@@ -51,14 +51,14 @@ class Ear extends Sensor{
         this.outputs.toxins.value = toxinInput;
 
         let creatureInput = 0;
-        for(let id in Life.creatures){
-            if(id == this.creature.id) continue;
-            let creature = Life.creatures[id];
-            if(withinRadius(creature.x, creature.y, this.x, this.y, this.hearingRadius)){
-                // pass sum of Sense data to creature's brain: M.e^(-S.d^2)
-                creatureInput += earMult*Math.exp(-earSensitivity*(distance(this.x, this.y, creature.x, creature.y)));                
-            }            
-        }
+        // for(let id in Life.creatures){
+        //     if(id == this.creature.id) continue;
+        //     let creature = Life.creatures[id];
+        //     if(withinRadius(creature.x, creature.y, this.x, this.y, this.hearingRadius)){
+        //         // pass sum of Sense data to creature's brain: M.e^(-S.d^2)
+        //         creatureInput += earMult*Math.exp(-earSensitivity*(distance(this.x, this.y, creature.x, creature.y)));                
+        //     }            
+        // }
 
         this.outputs.creatures.value = creatureInput;
 
